@@ -1201,8 +1201,38 @@ EXECUTE.
 ***** Grades 6-9 ELA/Literacy: 50% or more of students move from an ELA course grade of “D” or lower to a “C” or higher.
 
 ***** Math Assessments.
+IF (NOT MISSING(MTHAssess_PRE_VALUE_NUM) | NOT MISSING(MTHAssess_MY_VALUE_NUM)) MTHAssess_anyRawDP = 1.
+IF (MTHAssess_PRE_TRACK_EVAL ~= "" & MTHAssess_MY_TRACK_EVAL ~= "") MTHAssess_2PerfLvlDP = 1.
+EXECUTE.
+IF (MTHAssess_2PerfLvlDP = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) MTHAssess_StartOffSlid = 1.
+EXECUTE.
+IF (MTHAssess_StartOffSlid = 1 & MTHAssess_MY_TRACK_EVAL = "ON TRACK") MTHAssess_SOSMoveOn = 1.
+EXECUTE.
 ***** Grades 3-5 Math: 25% or more of students move from below benchmark on math skills assessment to at/above benchmark.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_anyRawDP = 1) IOG_MTHAssess35_anyRawDP = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_2PerfLvlDP = 1) IOG_MTHAssess35_2PerfLvlDP = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_StartOffSlid = 1) IOG_MTHAssess35_StartOffSlid = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_SOSMoveOn = 1) IOG_MTHAssess35_SOSMoveOn = 1.
+EXECUTE.
 ***** Grades 6-9 Math: 20% or more of students on official focus lists meeting the dosage threshold move from below benchmark on math skills assessment to at/above benchmark.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_anyRawDP = 1) IOG_MTHAssess69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_2PerfLvlDP = 1) IOG_MTHAssess69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_StartOffSlid = 1) IOG_MTHAssess69_StartOffSlid = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_SOSMoveOn = 1) IOG_MTHAssess69_SOSMoveOn = 1.
+EXECUTE.
+VARIABLE LABELS MTHAssess_anyRawDP "Number of students with at least one raw math assessment performance data point"
+   MTHAssess_2PerfLvlDP "Number of students with at least two math assessment performance level data points"
+   MTHAssess_StartOffSlid "Number of students who started off-track or sliding in math assessments"
+   MTHAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math assessments"
+   IOG_MTHAssess35_anyRawDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   IOG_MTHAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least two performance level data points"
+   IOG_MTHAssess35_StartOffSlid "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding"
+   IOG_MTHAssess35_SOSMoveOn "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   IOG_MTHAssess69_anyRawDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
+   IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track".
+EXECUTE.
 
 ***** Math Course Grades.
 ***** Grades 6-9 Math: 50% or more of students on official focus lists meeting the dosage threshold move from a math course grade of “D” or lower to a “C” or higher.
@@ -1426,21 +1456,136 @@ VALUE LABELS RegionID 1 "Atlantic"
 5 "West".
 EXECUTE.
 
+***** No longer need filtered dataset.
+DATASET CLOSE FINAL FILTERED.
+
 ************************************************************************************************************************************************************************************
 ***** Create site-level summary dataset.
 ************************************************************************************************************************************************************************************
 
-*DATASET DECLARE SITEDATASET.
-*DATASET ACTIVATE FINALDATASET.
+DATASET DECLARE SITEDATASET.
+DATASET ACTIVATE TEAMDATASET.
+DATASET COPY TEAMAGG.
+DATASET ACTIVATE TEAMAGG.
 
-*AGGREGATE /OUTFILE = SITEDATASET
+AGGREGATE /OUTFILE = SITEDATASET
    /BREAK = Location
-   /TeachRespCount = SUM(Teacher)
-   /PrinRespCount = SUM(Principal).
-
-*DATASET ACTIVATE SITEDATASET.
+   /RegionID = MEAN(RegionID)
+   /cyStudentIDCount = SUM(cyStudentIDCount)
+   /schoolCount = NU(cyschSchoolRefID)
+   /cysdSiteID = MEAN(cysdSiteID)
+   /DNSchoolCount = SUM(DNSchool)
+   /MinStudentGrade = MIN(StudentGrade)
+   /MaxStudentGrade = MAX(StudentGrade)
+   /TotIALIT = SUM(TotIALIT)
+   /TotIAMTH = SUM(TotIAMTH)
+   /TotIAATT = SUM(TotIAATT)
+   /TotIABEH = SUM(TotIABEH)
+   /TEAMIOGMinGrade = MIN(TEAMIOGMinGrade)
+   /TEAMIOGMaxGrade = MAX(TEAMIOGMaxGrade)
+   /SITEELAEnrollGoal = SUM(TEAMELAEnrollGoal)
+   /SITEMTHEnrollGoal = SUM(TEAMMTHEnrollGoal)
+   /SITEATTEnrollGoal = SUM(TEAMATTEnrollGoal)
+   /SITEBEHEnrollGoal = SUM(TEAMBEHEnrollGoal)
+   /SITEELAQ2EnrollBench = SUM(TEAMELAQ2EnrollBench)
+   /SITEMTHQ2EnrollBench = SUM(TEAMMTHQ2EnrollBench)
+   /SITEATTQ2EnrollBench = SUM(TEAMATTQ2EnrollBench)
+   /SITEBEHQ2EnrollBench = SUM(TEAMBEHQ2EnrollBench)
+   /SITEELAQ3EnrollBench = SUM(TEAMELAQ3EnrollBench)
+   /SITEMTHQ3EnrollBench = SUM(TEAMMTHQ3EnrollBench)
+   /SITEATTQ3EnrollBench = SUM(TEAMATTQ3EnrollBench)
+   /SITEBEHQ3EnrollBench = SUM(TEAMBEHQ3EnrollBench)
+   /SITEELADoseBench = SUM(TEAMELADoseBench)
+   /SITEMTHDoseBench = SUM(TEAMMTHDoseBench)
+   /SITEATTDoseBench = SUM(TEAMATTDoseBench)
+   /SITEBEHDoseBench = SUM(TEAMBEHDoseBench)
+   /TEAMELAQ2DoseGoalMin = MIN(TEAMELAQ2DoseGoal)
+   /TEAMELAQ3DoseGoalMin = MIN(TEAMELAQ3DoseGoal)
+   /TEAMELAQ4DoseGoalMin = MIN(TEAMELAQ4DoseGoal)
+   /TEAMELAQ2DoseGoalMax = MAX(TEAMELAQ2DoseGoal)
+   /TEAMELAQ3DoseGoalMax = MAX(TEAMELAQ3DoseGoal)
+   /TEAMELAQ4DoseGoalMax = MAX(TEAMELAQ4DoseGoal)
+   /TEAMMTHQ2DoseGoalMin = MIN(TEAMMTHQ2DoseGoal)
+   /TEAMMTHQ3DoseGoalMin = MIN(TEAMMTHQ3DoseGoal)
+   /TEAMMTHQ4DoseGoalMin = MIN(TEAMMTHQ4DoseGoal)
+   /TEAMMTHQ2DoseGoalMax = MAX(TEAMMTHQ2DoseGoal)
+   /TEAMMTHQ3DoseGoalMax = MAX(TEAMMTHQ3DoseGoal)
+   /TEAMMTHQ4DoseGoalMax = MAX(TEAMMTHQ4DoseGoal)
+   /LITMet30Enroll = SUM(LITMet30Enroll)
+   /MTHMet30Enroll = SUM(MTHMet30Enroll)
+   /ATTMet30Enroll = SUM(ATTMet30Enroll)
+   /BEHMet30Enroll = SUM(BEHMet30Enroll)
+   /LITMetQ2Dose = SUM(LITMetQ2Dose)
+   /LITMetQ3Dose = SUM(LITMetQ3Dose)
+   /LITMetQ4Dose = SUM(LITMetQ4Dose)
+   /MTHMetQ2Dose = SUM(MTHMetQ2Dose)
+   /MTHMetQ3Dose = SUM(MTHMetQ3Dose)
+   /MTHMetQ4Dose = SUM(MTHMetQ4Dose)
+   /ATTMet56Dose = SUM(ATTMet56Dose)
+   /BEHMet56Dose = SUM(BEHMet56Dose).
+DATASET ACTIVATE SITEDATASET.
 
 ***** Add variable labels.
+VARIABLE LABELS cyStudentIDCount "Total number of student records"
+   schoolCount "Total number of schools"
+   DNSchoolCount "Total number of DN schools"
+   MinStudentGrade "Lowest grade level in dataset"
+   MaxStudentGrade "Highest grade level in dataset"
+   TotIALIT "Number of students with a literacy IA-assignment"
+   TotIAMTH "Number of students with a math IA-assignment"
+   TotIAATT "Number of students with an attendance IA-assignment"
+   TotIABEH "Number of students with a behavior IA-assignment"
+   TEAMIOGMinGrade "Lowest grade level specified for internal reporting purposes"
+   TEAMIOGMaxGrade "Highest grade level specified for internal reporting purposes"
+   SITEELAEnrollGoal "ENROLL GOAL (EOY)\nSite-Level FY14 ELA/Literacy Focus List"
+   SITEMTHEnrollGoal "ENROLL GOAL (EOY)\nSite-Level FY14 Math Focus List"
+   SITEATTEnrollGoal "ENROLL GOAL (EOY)\nSite-Level FY14 Attendance Focus List"
+   SITEBEHEnrollGoal "ENROLL GOAL (EOY)\nSite-Level FY14 Behavior Focus List"
+   SITEELAQ2EnrollBench "ENROLL GOAL (Q2)\nSite-Level ELA/Literacy Enrollment"
+   SITEMTHQ2EnrollBench "ENROLL GOAL (Q2)\nSite-Level Math Enrollment"
+   SITEATTQ2EnrollBench "ENROLL GOAL (Q2)\nSite-Level Attendance Enrollment"
+   SITEBEHQ2EnrollBench "ENROLL GOAL (Q2)\nSite-Level Behavior Enrollment"
+   SITEELAQ3EnrollBench "ENROLL GOAL (Q3)\nSite-Level ELA/Literacy Enrollment"
+   SITEMTHQ3EnrollBench "ENROLL GOAL (Q3)\nSite-Level Math Enrollment"
+   SITEATTQ3EnrollBench "ENROLL GOAL (Q3)\nSite-Level Attendance Enrollment"
+   SITEBEHQ3EnrollBench "ENROLL GOAL (Q3)\nSite-Level Behavior Enrollment"
+   SITEELADoseBench "DOSAGE GOAL (EOY)\nFY14 Site-Level ELA/Literacy Focus List Dosage (80% of FL enrollment will meet dosage target)"
+   SITEMTHDoseBench "DOSAGE GOAL (EOY)\nFY14 Site-Level Math Focus List Dosage (80% of FL enrollment will meet dosage target)"
+   SITEATTDoseBench "DOSAGE GOAL (EOY)\nFY14 Site-Level Attendance Focus List Dosage (80% of FL enrollment will meet dosage target)"
+   SITEBEHDoseBench "DOSAGE GOAL (EOY)\nFY14 Site-Level Behavior Focus List Dosage (80% of FL enrollment will meet dosage target)"
+   TEAMELAQ2DoseGoalMin "DOSAGE GOAL (Q2)\nMinimum Team-Level ELA/Literacy Per-Student (in hours)"
+   TEAMELAQ3DoseGoalMin "DOSAGE GOAL (Q3)\nMinimum Team-Level ELA/Literacy Per-Student (in hours)"
+   TEAMELAQ4DoseGoalMin "DOSAGE GOAL (Q4)\nMinimum Team-Level ELA/Literacy Per-Student (in hours)"
+   TEAMELAQ2DoseGoalMax "DOSAGE GOAL (Q2)\nMaximum Team-Level ELA/Literacy Per-Student (in hours)"
+   TEAMELAQ3DoseGoalMax "DOSAGE GOAL (Q3)\nMaximum Team-Level ELA/Literacy Per-Student (in hours)"
+   TEAMELAQ4DoseGoalMax "DOSAGE GOAL (Q4)\nMaximum Team-Level ELA/Literacy Per-Student (in hours)"
+   TEAMMTHQ2DoseGoalMin "DOSAGE GOAL (Q2)\nMinimum Team-Level Math Per-Student (in hours)"
+   TEAMMTHQ3DoseGoalMin "DOSAGE GOAL (Q3)\nMinimum Team-Level Math Per-Student (in hours)"
+   TEAMMTHQ4DoseGoalMin "DOSAGE GOAL (Q4)\nMinimum Team-Level Math Per-Student (in hours)"
+   TEAMMTHQ2DoseGoalMax "DOSAGE GOAL (Q2)\nMaximum Team-Level Math Per-Student (in hours)"
+   TEAMMTHQ3DoseGoalMax "DOSAGE GOAL (Q3)\nMaximum Team-Level Math Per-Student (in hours)"
+   TEAMMTHQ4DoseGoalMax "DOSAGE GOAL (Q4)\nMaximum Team-Level Math Per-Student (in hours)"
+   LITMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (ELA/Literacy, with overlap)"
+   MTHMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Math, with overlap)"
+   ATTMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Attendance, with overlap)"
+   BEHMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Behavior, with overlap)"
+   LITMetQ2Dose "DOSAGE ACTUAL\nNumber of Students Meeting ELA/Literacy Q2 Dosage Benchmark (with overlap)"
+   LITMetQ3Dose "DOSAGE ACTUAL\nNumber of Students Meeting ELA/Literacy Q3 Dosage Benchmark (with overlap)"
+   LITMetQ4Dose "DOSAGE ACTUAL\nNumber of Students Meeting ELA/Literacy Q4 Dosage Benchmark (with overlap)"
+   MTHMetQ2Dose "DOSAGE ACTUAL\nNumber of Students Meeting Math Q2 Dosage Benchmark (with overlap)"
+   MTHMetQ3Dose "DOSAGE ACTUAL\nNumber of Students Meeting Math Q3 Dosage Benchmark (with overlap)"
+   MTHMetQ4Dose "DOSAGE ACTUAL\nNumber of Students Meeting Math Q4 Dosage Benchmark (with overlap)"
+   ATTMet56Dose "DOSAGE ACTUAL\nNumber of Students Enrolled 56+ Days (Attendance, with overlap)"
+   BEHMet56Dose "DOSAGE ACTUAL\nNumber of Students Enrolled 56+ Days (Behavior, with overlap)".
+VALUE LABELS RegionID 1 "Atlantic"
+2 "Midwest"
+3 "Northeast"
+4 "South"
+5 "West".
+EXECUTE.
+
+***** No longer need TEAMAGG dataset.
+DATASET CLOSE TEAMAGG.
 
 ************************************************************************************************************************************************************************************
 *****END OF SYNTAX FILE.
