@@ -1,0 +1,99 @@
+-- Create proxy data points separately for monthly school-based behavior and marking period school-based behavior. Then merge and select proxy data point.
+
+-- QUERY SYNTAX (MY proxy DJFM):
+
+SELECT schbeh.STUDENT_ID, COUNT(schbeh.OFFICE_REFERRALS) AS countOFF, COUNT(schbeh.DETENTIONS) AS countDET, COUNT(schbeh.SUSPENSIONS) AS countSUS,
+IIf(countOFF >= 2,SUM(schbeh.OFFICE_REFERRALS),Null) AS sumOFF,
+IIf(countDET >= 2,SUM(schbeh.DETENTIONS),Null) AS sumDET,
+IIf(countSUS >= 2,SUM(schbeh.SUSPENSIONS),Null) AS sumSUS
+FROM dbo_RPT_PERFORMANCE_LEVEL_BEH AS schbeh
+WHERE (INTERVAL LIKE 'Dec' OR INTERVAL LIKE 'Jan' OR INTERVAL LIKE 'Feb' OR INTERVAL LIKE 'Mar') AND Tag IS NULL
+GROUP BY STUDENT_ID;
+
+-- QUERY SYNTAX (MY proxy Marking Periods -- may want to double check this once more data is in for trimester, semester, etc.):
+
+SELECT schbeh1.*
+FROM dbo_RPT_PERFORMANCE_LEVEL_BEH AS schbeh1 LEFT JOIN dbo_RPT_PERFORMANCE_LEVEL_BEH AS schbeh2 ON (schbeh1.STUDENT_ID = schbeh2.STUDENT_ID AND schbeh1.FREQUENCY_PERIOD_ID < schbeh2.FREQUENCY_PERIOD_ID AND schbeh1.INTERVAL NOT LIKE '1st*' AND schbeh1.Tag IS NULL AND (schbeh1.INTERVAL LIKE '*Semester' OR schbeh1.INTERVAL LIKE '*Trimester' OR schbeh1.INTERVAL LIKE '*Quarter' OR schbeh1.INTERVAL LIKE '*Marking Period'))
+WHERE schbeh2.STUDENT_ID IS NULL;
+
+-- QUERY SYNTAX (Merge and concatenate - based on above queries):
+
+SELECT dbo_RPT_STUDENT_MAIN.SITE_NAME, dbo_RPT_STUDENT_MAIN.SCHOOL_NAME, dbo_RPT_STUDENT_MAIN.GRADE_ID, dbo_RPT_STUDENT_MAIN.DIPLOMAS_NOW_SCHOOL, prepost.*, dbo_RPT_SCHOOL_GRADE.*,
+IIf(dbo_RPT_STUDENT_MAIN.GRADE_ID = 21,-1,IIf(dbo_RPT_STUDENT_MAIN.GRADE_ID = 22,0,dbo_RPT_STUDENT_MAIN.GRADE_ID)) AS GRADE_ID_RECODE,
+IIf(((dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = 2848 Or dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = 2988) And dbo_RPT_STUDENT_MAIN.GRADE_ID < 9) Or (dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = 3010 And dbo_RPT_STUDENT_MAIN.GRADE_ID > 9),'0',DIPLOMAS_NOW_SCHOOL) AS DN_SCHOOL_BY_GRADE,
+IIf(prepost.ENROLLED_DAYS >= 56,1,IIf(prepost.ENROLLED_DAYS < 56,0,NULL)) AS MY_MET_56_DAYS,
+IIf(GRADE_ID_RECODE >= dbo_RPT_SCHOOL_GRADE.B_RULE_VAL3 AND GRADE_ID_RECODE <= dbo_RPT_SCHOOL_GRADE.B_RULE_VAL4,1,IIf(GRADE_ID_RECODE < dbo_RPT_SCHOOL_GRADE.B_RULE_VAL3 OR GRADE_ID_RECODE > dbo_RPT_SCHOOL_GRADE.B_RULE_VAL4,0,NULL)) AS MY_IN_IOG_GRADE_RANGE,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),'DJFM',IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[INTERVAL],[prepost].[POST_BEH_VALUE])) AS MY_BEH_VALUE,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),[MY_PROXY_BEHDJFM].[sumOFF],IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[OFFICE_REFERRALS],[prepost].[POST_BEH_OFF])) AS MY_BEH_OFF,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),[MY_PROXY_BEHDJFM].[sumDET],IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[DETENTIONS],[prepost].[POST_BEH_DET])) AS MY_BEH_DET,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),[MY_PROXY_BEHDJFM].[sumSUS],IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[SUSPENSIONS],[prepost].[POST_BEH_SUS])) AS MY_BEH_SUS,
+IIf(prepost.PRE_BEH_OFF = 1,CSTR(prepost.PRE_BEH_OFF) & ' office referral',IIf(prepost.PRE_BEH_OFF < 5,CSTR(prepost.PRE_BEH_OFF) & ' office referrals',IIf(prepost.PRE_BEH_OFF >= 5 AND prepost.PRE_BEH_OFF < 11,'5-10 office referrals',IIf(prepost.PRE_BEH_OFF >= 11,'11+ office referrals',NULL)))) AS PRE_BEH_OFF_CAT,
+IIf(prepost.PRE_BEH_DET = 1,CSTR(prepost.PRE_BEH_DET) & ' detention',IIf(prepost.PRE_BEH_DET < 5,CSTR(prepost.PRE_BEH_DET) & ' detentions',IIf(prepost.PRE_BEH_DET >= 5 AND prepost.PRE_BEH_DET < 11,'5-10 detentions',IIf(prepost.PRE_BEH_DET >= 11,'11+ detentions',NULL)))) AS PRE_BEH_DET_CAT,
+IIf(prepost.PRE_BEH_SUS = 1,CSTR(prepost.PRE_BEH_SUS) & ' suspension',IIf(prepost.PRE_BEH_SUS < 5,CSTR(prepost.PRE_BEH_SUS) & ' suspensions',IIf(prepost.PRE_BEH_SUS >= 5 AND prepost.PRE_BEH_SUS < 11,'5-10 suspensions',IIf(prepost.PRE_BEH_SUS >= 11,'11+ suspensions',NULL)))) AS PRE_BEH_SUS_CAT,
+IIf(MY_BEH_OFF = 1,CSTR(MY_BEH_OFF) & ' office referral',IIf(MY_BEH_OFF < 5,CSTR(MY_BEH_OFF) & ' office referrals',IIf(MY_BEH_OFF >= 5 AND MY_BEH_OFF < 11,'5-10 office referrals',IIf(MY_BEH_OFF >= 11,'11+ office referrals',NULL)))) AS MY_BEH_OFF_CAT,
+IIf(MY_BEH_DET = 1,CSTR(MY_BEH_DET) & ' detention',IIf(MY_BEH_DET < 5,CSTR(MY_BEH_DET) & ' detentions',IIf(MY_BEH_DET >= 5 AND MY_BEH_DET < 11,'5-10 detentions',IIf(MY_BEH_DET >= 11,'11+ detentions',NULL)))) AS MY_BEH_DET_CAT,
+IIf(MY_BEH_SUS = 1,CSTR(MY_BEH_SUS) & ' suspension',IIf(MY_BEH_SUS < 5,CSTR(MY_BEH_SUS) & ' suspensions',IIf(MY_BEH_SUS >= 5 AND MY_BEH_SUS < 11,'5-10 suspensions',IIf(MY_BEH_SUS >= 11,'11+ suspensions',NULL)))) AS MY_BEH_SUS_CAT,
+IIf(prepost.PRE_BEH_OFF = 0 AND MY_BEH_OFF = 0,'Maintained (Prevention)',IIf(prepost.PRE_BEH_OFF = 0 AND MY_BEH_OFF > 0,'Increased',IIf(prepost.PRE_BEH_OFF = 0 and MY_BEH_OFF IS NULL,'Insufficient data',NULL))) AS MY_OFF_FromZero,
+IIf(prepost.PRE_BEH_DET = 0 AND MY_BEH_DET = 0,'Maintained (Prevention)',IIf(prepost.PRE_BEH_DET = 0 AND MY_BEH_DET > 0,'Increased',IIf(prepost.PRE_BEH_DET = 0 AND MY_BEH_DET IS NULL,'Insufficient data',NULL))) AS MY_DET_FromZero,
+IIf(prepost.PRE_BEH_SUS = 0 AND MY_BEH_SUS = 0,'Maintained (Prevention)',IIf(prepost.PRE_BEH_SUS = 0 AND MY_BEH_SUS > 0,'Increased',IIf(prepost.PRE_BEH_SUS = 0 AND MY_BEH_SUS IS NULL,'Insufficient data',NULL))) AS MY_SUS_FromZero,
+IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF > MY_BEH_OFF,'Decreased',IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF = MY_BEH_OFF,'No change',IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF < MY_BEH_OFF,'Increased',IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF IS NULL,'Insufficient data',NULL)))) AS MY_OFF_FromGTZero,
+IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET > MY_BEH_DET,'Decreased',IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET = MY_BEH_DET,'No change',IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET < MY_BEH_DET,'Increased',IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET IS NULL,'Insufficient data',NULL)))) AS MY_DET_FromGTZero,
+IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS > MY_BEH_SUS,'Decreased',IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS = MY_BEH_SUS,'No change',IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS < MY_BEH_SUS,'Increased',IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS IS NULL,'Insufficient data',NULL)))) AS MY_SUS_FromGTZero,
+IIf(prepost.PRE_BEH_SUS < 2,'Pre-data point: less than 2 suspensions',IIf(prepost.PRE_BEH_SUS >= 2,'Pre-data point: 2 or more suspensions',NULL)) AS PRE_EWI,
+IIf(MY_BEH_SUS < 2,'Post/proxy-data point: less than 2 suspensions',IIf(MY_BEH_SUS >= 2,'Post/proxy-data point: 2 or more suspensions',NULL)) AS MY_EWI,
+IIf(PRE_EWI LIKE '*less than 2 suspensions' AND MY_EWI LIKE '*less than 2 suspensions','Started with no EWI, maintained no EWI',IIf(PRE_EWI LIKE '*less than 2 suspensions' AND MY_EWI LIKE '*2 or more suspensions','Started with no EWI, EWI at mid-year',IIf(PRE_EWI LIKE '*2 or more suspensions' AND MY_EWI LIKE '*less than 2 suspensions','Started with EWI, no EWI at mid-year',IIf(PRE_EWI LIKE '*2 or more suspensions' AND MY_EWI LIKE '*2 or more suspensions','Started with EWI, EWI at mid-year',NULL)))) AS MY_EWI_CHANGE
+FROM dbo_RPT_SCHOOL_GRADE INNER JOIN (dbo_RPT_STUDENT_MAIN INNER JOIN ((dbo_EVAL_BEH AS prepost LEFT JOIN
+(*****ABOVE_QUERY_MarkingPeriod*****)
+AS MY_PROXY_BEHMP ON (prepost.STUDENT_ID = MY_PROXY_BEHMP.STUDENT_ID))
+LEFT JOIN
+(*****ABOVE_QUERY_DJFM*****)
+AS MY_PROXY_BEHDJFM ON (prepost.STUDENT_ID = MY_PROXY_BEHDJFM.STUDENT_ID))
+ON (dbo_RPT_STUDENT_MAIN.STUDENT_ID = prepost.STUDENT_ID))
+ON (dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = dbo_RPT_STUDENT_MAIN.SCHOOL_ID AND dbo_RPT_SCHOOL_GRADE.INDICATOR_ID = 2)
+WHERE dbo_RPT_SCHOOL_GRADE.GRADE_ID = dbo_RPT_STUDENT_MAIN.GRADE_ID
+ORDER BY dbo_RPT_STUDENT_MAIN.SITE_NAME,dbo_RPT_STUDENT_MAIN.SCHOOL_NAME,dbo_RPT_STUDENT_MAIN.GRADE_ID,dbo_RPT_STUDENT_MAIN.STUDENT_ID;
+
+-- QUERY SYNTAX (Merge and concatenate - SINGLE QUERY VERSION)
+
+SELECT dbo_RPT_STUDENT_MAIN.SITE_NAME, dbo_RPT_STUDENT_MAIN.SCHOOL_NAME, dbo_RPT_STUDENT_MAIN.GRADE_ID, dbo_RPT_STUDENT_MAIN.DIPLOMAS_NOW_SCHOOL, prepost.*, dbo_RPT_SCHOOL_GRADE.*,
+IIf(dbo_RPT_STUDENT_MAIN.GRADE_ID = 21,-1,IIf(dbo_RPT_STUDENT_MAIN.GRADE_ID = 22,0,dbo_RPT_STUDENT_MAIN.GRADE_ID)) AS GRADE_ID_RECODE,
+IIf(((dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = 2848 Or dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = 2988) And dbo_RPT_STUDENT_MAIN.GRADE_ID < 9) Or (dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = 3010 And dbo_RPT_STUDENT_MAIN.GRADE_ID > 9),'0',DIPLOMAS_NOW_SCHOOL) AS DN_SCHOOL_BY_GRADE,
+IIf(prepost.ENROLLED_DAYS >= 56,1,IIf(prepost.ENROLLED_DAYS < 56,0,NULL)) AS MY_MET_56_DAYS,
+IIf(GRADE_ID_RECODE >= dbo_RPT_SCHOOL_GRADE.B_RULE_VAL3 AND GRADE_ID_RECODE <= dbo_RPT_SCHOOL_GRADE.B_RULE_VAL4,1,IIf(GRADE_ID_RECODE < dbo_RPT_SCHOOL_GRADE.B_RULE_VAL3 OR GRADE_ID_RECODE > dbo_RPT_SCHOOL_GRADE.B_RULE_VAL4,0,NULL)) AS MY_IN_IOG_GRADE_RANGE,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),'DJFM',IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[INTERVAL],[prepost].[POST_BEH_VALUE])) AS MY_BEH_VALUE,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),[MY_PROXY_BEHDJFM].[sumOFF],IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[OFFICE_REFERRALS],[prepost].[POST_BEH_OFF])) AS MY_BEH_OFF,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),[MY_PROXY_BEHDJFM].[sumDET],IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[DETENTIONS],[prepost].[POST_BEH_DET])) AS MY_BEH_DET,
+IIf(([prepost].[POST_BEH_VALUE] IS NULL AND [prepost].[PRE_BEH_VALUE] LIKE 'ASON'),[MY_PROXY_BEHDJFM].[sumSUS],IIf(([prepost].[POST_BEH_VALUE] IS NULL AND ([prepost].[PRE_BEH_VALUE] LIKE '*Semester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Trimester' OR [prepost].[PRE_BEH_VALUE] LIKE '*Quarter' OR [prepost].[PRE_BEH_VALUE] LIKE '*Marking Period')),[MY_PROXY_BEHMP].[SUSPENSIONS],[prepost].[POST_BEH_SUS])) AS MY_BEH_SUS,
+IIf(prepost.PRE_BEH_OFF = 1,CSTR(prepost.PRE_BEH_OFF) & ' office referral',IIf(prepost.PRE_BEH_OFF < 5,CSTR(prepost.PRE_BEH_OFF) & ' office referrals',IIf(prepost.PRE_BEH_OFF >= 5 AND prepost.PRE_BEH_OFF < 11,'5-10 office referrals',IIf(prepost.PRE_BEH_OFF >= 11,'11+ office referrals',NULL)))) AS PRE_BEH_OFF_CAT,
+IIf(prepost.PRE_BEH_DET = 1,CSTR(prepost.PRE_BEH_DET) & ' detention',IIf(prepost.PRE_BEH_DET < 5,CSTR(prepost.PRE_BEH_DET) & ' detentions',IIf(prepost.PRE_BEH_DET >= 5 AND prepost.PRE_BEH_DET < 11,'5-10 detentions',IIf(prepost.PRE_BEH_DET >= 11,'11+ detentions',NULL)))) AS PRE_BEH_DET_CAT,
+IIf(prepost.PRE_BEH_SUS = 1,CSTR(prepost.PRE_BEH_SUS) & ' suspension',IIf(prepost.PRE_BEH_SUS < 5,CSTR(prepost.PRE_BEH_SUS) & ' suspensions',IIf(prepost.PRE_BEH_SUS >= 5 AND prepost.PRE_BEH_SUS < 11,'5-10 suspensions',IIf(prepost.PRE_BEH_SUS >= 11,'11+ suspensions',NULL)))) AS PRE_BEH_SUS_CAT,
+IIf(MY_BEH_OFF = 1,CSTR(MY_BEH_OFF) & ' office referral',IIf(MY_BEH_OFF < 5,CSTR(MY_BEH_OFF) & ' office referrals',IIf(MY_BEH_OFF >= 5 AND MY_BEH_OFF < 11,'5-10 office referrals',IIf(MY_BEH_OFF >= 11,'11+ office referrals',NULL)))) AS MY_BEH_OFF_CAT,
+IIf(MY_BEH_DET = 1,CSTR(MY_BEH_DET) & ' detention',IIf(MY_BEH_DET < 5,CSTR(MY_BEH_DET) & ' detentions',IIf(MY_BEH_DET >= 5 AND MY_BEH_DET < 11,'5-10 detentions',IIf(MY_BEH_DET >= 11,'11+ detentions',NULL)))) AS MY_BEH_DET_CAT,
+IIf(MY_BEH_SUS = 1,CSTR(MY_BEH_SUS) & ' suspension',IIf(MY_BEH_SUS < 5,CSTR(MY_BEH_SUS) & ' suspensions',IIf(MY_BEH_SUS >= 5 AND MY_BEH_SUS < 11,'5-10 suspensions',IIf(MY_BEH_SUS >= 11,'11+ suspensions',NULL)))) AS MY_BEH_SUS_CAT,
+IIf(prepost.PRE_BEH_OFF = 0 AND MY_BEH_OFF = 0,'Maintained (Prevention)',IIf(prepost.PRE_BEH_OFF = 0 AND MY_BEH_OFF > 0,'Increased',IIf(prepost.PRE_BEH_OFF = 0 and MY_BEH_OFF IS NULL,'Insufficient data',NULL))) AS MY_OFF_FromZero,
+IIf(prepost.PRE_BEH_DET = 0 AND MY_BEH_DET = 0,'Maintained (Prevention)',IIf(prepost.PRE_BEH_DET = 0 AND MY_BEH_DET > 0,'Increased',IIf(prepost.PRE_BEH_DET = 0 AND MY_BEH_DET IS NULL,'Insufficient data',NULL))) AS MY_DET_FromZero,
+IIf(prepost.PRE_BEH_SUS = 0 AND MY_BEH_SUS = 0,'Maintained (Prevention)',IIf(prepost.PRE_BEH_SUS = 0 AND MY_BEH_SUS > 0,'Increased',IIf(prepost.PRE_BEH_SUS = 0 AND MY_BEH_SUS IS NULL,'Insufficient data',NULL))) AS MY_SUS_FromZero,
+IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF > MY_BEH_OFF,'Decreased',IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF = MY_BEH_OFF,'No change',IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF < MY_BEH_OFF,'Increased',IIf(prepost.PRE_BEH_OFF > 0 AND prepost.PRE_BEH_OFF IS NULL,'Insufficient data',NULL)))) AS MY_OFF_FromGTZero,
+IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET > MY_BEH_DET,'Decreased',IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET = MY_BEH_DET,'No change',IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET < MY_BEH_DET,'Increased',IIf(prepost.PRE_BEH_DET > 0 AND prepost.PRE_BEH_DET IS NULL,'Insufficient data',NULL)))) AS MY_DET_FromGTZero,
+IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS > MY_BEH_SUS,'Decreased',IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS = MY_BEH_SUS,'No change',IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS < MY_BEH_SUS,'Increased',IIf(prepost.PRE_BEH_SUS > 0 AND prepost.PRE_BEH_SUS IS NULL,'Insufficient data',NULL)))) AS MY_SUS_FromGTZero,
+IIf(prepost.PRE_BEH_SUS < 2,'Pre-data point: less than 2 suspensions',IIf(prepost.PRE_BEH_SUS >= 2,'Pre-data point: 2 or more suspensions',NULL)) AS PRE_EWI,
+IIf(MY_BEH_SUS < 2,'Post/proxy-data point: less than 2 suspensions',IIf(MY_BEH_SUS >= 2,'Post/proxy-data point: 2 or more suspensions',NULL)) AS MY_EWI,
+IIf(PRE_EWI LIKE '*less than 2 suspensions' AND MY_EWI LIKE '*less than 2 suspensions','Started with no EWI, maintained no EWI',IIf(PRE_EWI LIKE '*less than 2 suspensions' AND MY_EWI LIKE '*2 or more suspensions','Started with no EWI, EWI at mid-year',IIf(PRE_EWI LIKE '*2 or more suspensions' AND MY_EWI LIKE '*less than 2 suspensions','Started with EWI, no EWI at mid-year',IIf(PRE_EWI LIKE '*2 or more suspensions' AND MY_EWI LIKE '*2 or more suspensions','Started with EWI, EWI at mid-year',NULL)))) AS MY_EWI_CHANGE
+FROM dbo_RPT_SCHOOL_GRADE INNER JOIN (dbo_RPT_STUDENT_MAIN INNER JOIN ((dbo_EVAL_BEH AS prepost LEFT JOIN
+(SELECT schbeh1.*
+FROM dbo_RPT_PERFORMANCE_LEVEL_BEH AS schbeh1 LEFT JOIN dbo_RPT_PERFORMANCE_LEVEL_BEH AS schbeh2 ON (schbeh1.STUDENT_ID = schbeh2.STUDENT_ID AND schbeh1.FREQUENCY_PERIOD_ID < schbeh2.FREQUENCY_PERIOD_ID AND schbeh1.INTERVAL NOT LIKE '1st*' AND schbeh1.Tag IS NULL AND (schbeh1.INTERVAL LIKE '*Semester' OR schbeh1.INTERVAL LIKE '*Trimester' OR schbeh1.INTERVAL LIKE '*Quarter' OR schbeh1.INTERVAL LIKE '*Marking Period'))
+WHERE schbeh2.STUDENT_ID IS NULL)
+AS MY_PROXY_BEHMP ON (prepost.STUDENT_ID = MY_PROXY_BEHMP.STUDENT_ID))
+LEFT JOIN
+(SELECT schbeh.STUDENT_ID, COUNT(schbeh.OFFICE_REFERRALS) AS countOFF, COUNT(schbeh.DETENTIONS) AS countDET, COUNT(schbeh.SUSPENSIONS) AS countSUS,
+IIf(countOFF >= 2,SUM(schbeh.OFFICE_REFERRALS),Null) AS sumOFF,
+IIf(countDET >= 2,SUM(schbeh.DETENTIONS),Null) AS sumDET,
+IIf(countSUS >= 2,SUM(schbeh.SUSPENSIONS),Null) AS sumSUS
+FROM dbo_RPT_PERFORMANCE_LEVEL_BEH AS schbeh
+WHERE (INTERVAL LIKE 'Dec' OR INTERVAL LIKE 'Jan' OR INTERVAL LIKE 'Feb' OR INTERVAL LIKE 'Mar') AND Tag IS NULL
+GROUP BY STUDENT_ID)
+AS MY_PROXY_BEHDJFM ON (prepost.STUDENT_ID = MY_PROXY_BEHDJFM.STUDENT_ID))
+ON (dbo_RPT_STUDENT_MAIN.STUDENT_ID = prepost.STUDENT_ID))
+ON (dbo_RPT_SCHOOL_GRADE.SCHOOL_ID = dbo_RPT_STUDENT_MAIN.SCHOOL_ID AND dbo_RPT_SCHOOL_GRADE.INDICATOR_ID = 2)
+WHERE dbo_RPT_SCHOOL_GRADE.GRADE_ID = dbo_RPT_STUDENT_MAIN.GRADE_ID
+ORDER BY dbo_RPT_STUDENT_MAIN.SITE_NAME,dbo_RPT_STUDENT_MAIN.SCHOOL_NAME,dbo_RPT_STUDENT_MAIN.GRADE_ID,dbo_RPT_STUDENT_MAIN.STUDENT_ID;
