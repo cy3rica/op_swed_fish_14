@@ -29,7 +29,7 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\cychannel FY14 List of Schools 
 DATASET NAME cychanSchoolInfo.
 
 ***** Pull up site/team-level enrollment and dosage goals.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_Enrollment and Dosage Targets FINAL 2014.05.02.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_Enrollment and Dosage Targets FINAL 2014.05.30.sav".
 DATASET NAME SiteTeamEnrollDosage.
 
 ***** Pull up AmeriCorps grant ID translation file.
@@ -37,31 +37,31 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 cyschoolhouse AmeriCorps G
 DATASET NAME ACGrantIDs.
 
 ***** Pull up AmeriCorps grant requirements.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 ACPM Summary for Progress Monitoring_eval 2014.04.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 ACPM Summary for Progress Monitoring_eval 2014.05.30.sav".
 DATASET NAME ACGoals.
 
 ***** Pull up Student ID translation file.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\dbo_RPT_STUDENT_MAIN 2014.05.16.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\dbo_RPT_STUDENT_MAIN 2014.05.30.sav".
 DATASET NAME StPerfIDs.
 
 ***** Pull up literacy assessment performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_LIT_ASSESS 2014.05.16.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_LIT_ASSESS 2014.05.30.sav".
 DATASET NAME LITAssessPerf.
 
 ***** Pull up math assessment performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_MTH_ASSESS 2014.05.16.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_MTH_ASSESS 2014.05.30.sav".
 DATASET NAME MTHAssessPerf.
 
 ***** Pull up ELA course grade performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ELA_CG 2014.05.20.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ELA_CG 2014.05.30.sav".
 DATASET NAME ELACGPerf.
 
 ***** Pull up math course grade performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_MTH_CG 2014.05.16.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_MTH_CG 2014.05.30.sav".
 DATASET NAME MTHCGPerf.
 
 ***** Pull up attendance performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ATT 2014.05.16.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ATT 2014.05.30.sav".
 DATASET NAME ATTPerf.
 
 ************************************************************************************************************************************************************************************
@@ -1063,14 +1063,14 @@ EXECUTE.
 ****************************************************************************************************
 
 ***** Calculate Met/Not Met Enrollment Variables -- ALL STUDENTS -- USE FOR DATA ENTRY MONITORING.
-IF (LITEnroll >= 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= XDATE.DATE($TIME)) LITMet30EnrollALL = 1.
-IF (LITEnroll < 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= XDATE.DATE($TIME)) LITMet30EnrollALL = 0.
-IF (MTHEnroll >= 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= XDATE.DATE($TIME)) MTHMet30EnrollALL = 1.
-IF (MTHEnroll < 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= XDATE.DATE($TIME)) MTHMet30EnrollALL = 0.
-IF (ATTEnroll >= 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= XDATE.DATE($TIME)) ATTMet30EnrollALL = 1.
-IF (ATTEnroll < 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= XDATE.DATE($TIME)) ATTMet30EnrollALL = 0.
-IF (BEHEnroll >= 30  & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= XDATE.DATE($TIME)) BEHMet30EnrollALL = 1.
-IF (BEHEnroll < 30 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= XDATE.DATE($TIME)) BEHMet30EnrollALL = 0.
+IF (LITEnroll >= 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30EnrollALL = 1.
+IF (LITEnroll < 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30EnrollALL = 0.
+IF (MTHEnroll >= 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30EnrollALL = 1.
+IF (MTHEnroll < 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30EnrollALL = 0.
+IF (ATTEnroll >= 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30EnrollALL = 1.
+IF (ATTEnroll < 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30EnrollALL = 0.
+IF (BEHEnroll >= 30  & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30EnrollALL = 1.
+IF (BEHEnroll < 30 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30EnrollALL = 0.
 VARIABLE LABELS LITMet30EnrollALL "Number of Students Enrolled 30+ Days (ELA/Literacy, with overlap, regardless of IA-assignment)"
    MTHMet30EnrollALL "Number of Students Enrolled 30+ Days (Math, with overlap, regardless of IA-assignment)"
    ATTMet30EnrollALL "Number of Students Enrolled 30+ Days (Attendance, with overlap, regardless of IA-assignment)"
@@ -1080,14 +1080,14 @@ VALUE LABELS LITMet30EnrollALL MTHMet30EnrollALL ATTMet30EnrollALL BEHMet30Enrol
 EXECUTE.
 
 ***** Calculate Met/Not Met Enrollment Variables -- IA-ASSIGNED STUDENTS ONLY, USE THESE FOR ANALYSIS TO COUNT/SELECT OFFICIAL FL #s.
-IF (LITEnroll >= 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= XDATE.DATE($TIME)) LITMet30Enroll = 1.
-IF (LITEnroll < 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= XDATE.DATE($TIME)) LITMet30Enroll = 0.
-IF (MTHEnroll >= 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= XDATE.DATE($TIME)) MTHMet30Enroll = 1.
-IF (MTHEnroll < 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= XDATE.DATE($TIME)) MTHMet30Enroll = 0.
-IF (ATTEnroll >= 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= XDATE.DATE($TIME)) ATTMet30Enroll = 1.
-IF (ATTEnroll < 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= XDATE.DATE($TIME)) ATTMet30Enroll = 0.
-IF (BEHEnroll >= 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= XDATE.DATE($TIME)) BEHMet30Enroll = 1.
-IF (BEHEnroll < 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= XDATE.DATE($TIME)) BEHMet30Enroll = 0.
+IF (LITEnroll >= 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30Enroll = 1.
+IF (LITEnroll < 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30Enroll = 0.
+IF (MTHEnroll >= 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30Enroll = 1.
+IF (MTHEnroll < 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30Enroll = 0.
+IF (ATTEnroll >= 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30Enroll = 1.
+IF (ATTEnroll < 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30Enroll = 0.
+IF (BEHEnroll >= 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30Enroll = 1.
+IF (BEHEnroll < 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30Enroll = 0.
 VARIABLE LABELS LITMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (ELA/Literacy, with overlap)"
    MTHMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Math, with overlap)"
    ATTMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Attendance, with overlap)"
@@ -1538,8 +1538,8 @@ DATASET ACTIVATE FINALTEAMDATASET.
 ***** Calculate % met dosage variables and % met IOG.
 COMPUTE LITMetQ4DosePerc = LITMetQ4Dose / LITMet30Enroll.
 COMPUTE MTHMetQ4DosePerc = MTHMetQ4Dose / MTHMet30Enroll.
-COMPUTE ATTMet56DosePerc = ATTMet56DosePerc / ATTMet30Enroll.
-COMPUTE BEHMet56DosePerc = BEHMet56DosePerc / BEHMet30Enroll.
+COMPUTE ATTMet56DosePerc = ATTMet56Dose / ATTMet30Enroll.
+COMPUTE BEHMet56DosePerc = BEHMet56Dose / BEHMet30Enroll.
 COMPUTE IOG_LITAssess35_SOSMoveOnPerc = IOG_LITAssess35_SOSMoveOn / IOG_LITAssess35_StartOffSlid.
 COMPUTE IOG_LITAssess69_SOSMoveOnPerc = IOG_LITAssess69_SOSMoveOn / IOG_LITAssess69_StartOffSlid.
 COMPUTE IOG_ELACG69_SOSMoveOnPerc = IOG_ELACG69_SOSMoveOn / IOG_ELACG69_StartOffSlid.
@@ -1801,8 +1801,8 @@ DATASET ACTIVATE FINALSITEDATASET.
 ***** Calculate % met dosage variables and % met IOG.
 COMPUTE LITMetQ4DosePerc = LITMetQ4Dose / LITMet30Enroll.
 COMPUTE MTHMetQ4DosePerc = MTHMetQ4Dose / MTHMet30Enroll.
-COMPUTE ATTMet56DosePerc = ATTMet56DosePerc / ATTMet30Enroll.
-COMPUTE BEHMet56DosePerc = BEHMet56DosePerc / BEHMet30Enroll.
+COMPUTE ATTMet56DosePerc = ATTMet56Dose / ATTMet30Enroll.
+COMPUTE BEHMet56DosePerc = BEHMet56Dose / BEHMet30Enroll.
 COMPUTE IOG_LITAssess35_SOSMoveOnPerc = IOG_LITAssess35_SOSMoveOn / IOG_LITAssess35_StartOffSlid.
 COMPUTE IOG_LITAssess69_SOSMoveOnPerc = IOG_LITAssess69_SOSMoveOn / IOG_LITAssess69_StartOffSlid.
 COMPUTE IOG_ELACG69_SOSMoveOnPerc = IOG_ELACG69_SOSMoveOn / IOG_ELACG69_StartOffSlid.
