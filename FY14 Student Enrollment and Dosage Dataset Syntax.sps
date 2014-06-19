@@ -1145,7 +1145,7 @@ VALUE LABELS MTHMetQ4Dose 0 "Did not meet Q4 math dosage goal"
 EXECUTE.
 
 ************************************************************************************************************************************************************************************
-***** Calculate additional variables -- FOR IOG.
+***** Calculate additional variables -- FOR IOG and BOCY.
 ************************************************************************************************************************************************************************************
 
 ***** Default to grades 3-9 if missing info.
@@ -1183,6 +1183,10 @@ IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dos
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_StartOffSlid = 1) IOG_LITAssess69_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_SOSMoveOn = 1) IOG_LITAssess69_SOSMoveOn = 1.
 EXECUTE.
+***** BOCY: WSWC-only, official focus list, met dosage, started off-track or sliding.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & (LITAssess_PRE_TRACK_EVAL = "SLIDING" | LITAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_LITAssess35_StartOffSlid = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & (LITAssess_PRE_TRACK_EVAL = "SLIDING" | LITAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_LITAssess69_StartOffSlid = 1.
+EXECUTE.
 VARIABLE LABELS LITAssess_anyRawDP "Number of students with at least one raw literacy assessment performance data point"
    LITAssess_2PerfLvlDP "Number of students with at least two literacy assessment performance level data points"
    LITAssess_StartOffSlid "Number of students who started off-track or sliding in literacy assessments"
@@ -1194,7 +1198,9 @@ VARIABLE LABELS LITAssess_anyRawDP "Number of students with at least one raw lit
    IOG_LITAssess69_anyRawDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
    IOG_LITAssess69_2PerfLvlDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
    IOG_LITAssess69_StartOffSlid "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
-   IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track".
+   IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
+   BOCY_LITAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
+   BOCY_LITAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding".
 EXECUTE.
 
 ***** ELA Course Grades.
@@ -1241,6 +1247,10 @@ IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dos
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_StartOffSlid = 1) IOG_MTHAssess69_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_SOSMoveOn = 1) IOG_MTHAssess69_SOSMoveOn = 1.
 EXECUTE.
+***** BOCY: WSWC-only, official focus list, met dosage, started off-track or sliding.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_MTHAssess35_StartOffSlid = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_MTHAssess69_StartOffSlid = 1.
+EXECUTE.
 VARIABLE LABELS MTHAssess_anyRawDP "Number of students with at least one raw math assessment performance data point"
    MTHAssess_2PerfLvlDP "Number of students with at least two math assessment performance level data points"
    MTHAssess_StartOffSlid "Number of students who started off-track or sliding in math assessments"
@@ -1252,7 +1262,9 @@ VARIABLE LABELS MTHAssess_anyRawDP "Number of students with at least one raw mat
    IOG_MTHAssess69_anyRawDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
    IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
    IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
-   IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track".
+   IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   BOCY_MTHAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
+   BOCY_MTHAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding".
 EXECUTE.
 
 ***** Math Course Grades.
@@ -1293,6 +1305,9 @@ IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dos
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_StartLT90ADA = 1) IOG_ATT69_StartLT90ADA = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_SOSMoveOn = 1) IOG_ATT69_SOSMoveOn = 1.
 EXECUTE.
+***** BOCY: WSWC-only, official focus list, enrolled 56+ days, started <90% ADA.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_PRE_ADA < 0.9) BOCY_ATT69_StartLT90ADA = 1.
+EXECUTE.
 VARIABLE LABELS ATT_anyRawDP "Number of students with at least one attendance (ADA) performance data point"
    ATT_2PerfLvlDP "Number of students with at least two attendance (ADA) performance level data points"
    ATT_StartLT90ADA "Number of students who started with less than 90% average daily attendance"
@@ -1300,7 +1315,8 @@ VARIABLE LABELS ATT_anyRawDP "Number of students with at least one attendance (A
    IOG_ATT69_anyRawDP "IOG: 6th-9th Grade Attendance: Number of students who had at least one ADA performance data point"
    IOG_ATT69_2PerfLvlDP "IOG: 6th-9th Grade Attendance: Number of students who had at least two performance level data points"
    IOG_ATT69_StartLT90ADA "IOG: 6th-9th Grade Attendance: Number of students who started with less than 90% average daily attendance"
-   IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA".
+   IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA"
+   BOCY_ATT69_StartLT90ADA "Best of City Year: 6th-9th Grade Attendance: Number of students on official focus lists, enrolled 56+ days, and started with less than 90% average daily attendance".
 EXECUTE.
 
 ************************************************************************************************************************************************************************************
@@ -1496,6 +1512,8 @@ AGGREGATE /OUTFILE = FINALTEAMDATASET
    /IOG_LITAssess69_2PerfLvlDP = SUM(IOG_LITAssess69_2PerfLvlDP)
    /IOG_LITAssess69_StartOffSlid = SUM(IOG_LITAssess69_StartOffSlid)
    /IOG_LITAssess69_SOSMoveOn = SUM(IOG_LITAssess69_SOSMoveOn)
+   /BOCY_LITAssess35_StartOffSlid = SUM(BOCY_LITAssess35_StartOffSlid)
+   /BOCY_LITAssess69_StartOffSlid = SUM(BOCY_LITAssess69_StartOffSlid)
    /ELACG_anyRawDP = SUM(ELACG_anyRawDP)
    /ELACG_2PerfLvlDP = SUM(ELACG_2PerfLvlDP)
    /ELACG_StartOffSlid = SUM(ELACG_StartOffSlid)
@@ -1516,6 +1534,8 @@ AGGREGATE /OUTFILE = FINALTEAMDATASET
    /IOG_MTHAssess69_2PerfLvlDP = SUM(IOG_MTHAssess69_2PerfLvlDP)
    /IOG_MTHAssess69_StartOffSlid = SUM(IOG_MTHAssess69_StartOffSlid)
    /IOG_MTHAssess69_SOSMoveOn = SUM(IOG_MTHAssess69_SOSMoveOn)
+   /BOCY_MTHAssess35_StartOffSlid = SUM(BOCY_MTHAssess35_StartOffSlid)
+   /BOCY_MTHAssess69_StartOffSlid = SUM(BOCY_MTHAssess69_StartOffSlid)
    /MTHCG_anyRawDP = SUM(MTHCG_anyRawDP)
    /MTHCG_2PerfLvlDP = SUM(MTHCG_2PerfLvlDP)
    /MTHCG_StartOffSlid = SUM(MTHCG_StartOffSlid)
@@ -1531,7 +1551,8 @@ AGGREGATE /OUTFILE = FINALTEAMDATASET
    /IOG_ATT69_anyRawDP = SUM(IOG_ATT69_anyRawDP)
    /IOG_ATT69_2PerfLvlDP = SUM(IOG_ATT69_2PerfLvlDP)
    /IOG_ATT69_StartLT90ADA = SUM(IOG_ATT69_StartLT90ADA)
-   /IOG_ATT69_SOSMoveOn = SUM(IOG_ATT69_SOSMoveOn).
+   /IOG_ATT69_SOSMoveOn = SUM(IOG_ATT69_SOSMoveOn)
+   /BOCY_ATT69_StartLT90ADA = SUM(BOCY_ATT69_StartLT90ADA).
 
 DATASET ACTIVATE FINALTEAMDATASET.
 
@@ -1623,6 +1644,8 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_LITAssess69_2PerfLvlDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
    IOG_LITAssess69_StartOffSlid "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
+   BOCY_LITAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
+   BOCY_LITAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    ELACG_anyRawDP "Number of students with at least one ELA course grade performance data point"
    ELACG_2PerfLvlDP "Number of students with at least two ELA course grade performance level data points"
    ELACG_StartOffSlid "Number of students who started off-track or sliding in ELA course grades"
@@ -1643,6 +1666,8 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
    IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   BOCY_MTHAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
+   BOCY_MTHAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    MTHCG_anyRawDP "Number of students with at least one math course grade performance data point"
    MTHCG_2PerfLvlDP "Number of students with at least two math course grade performance level data points"
    MTHCG_StartOffSlid "Number of students who started off-track or sliding in math course grades"
@@ -1659,6 +1684,7 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_ATT69_2PerfLvlDP "IOG: 6th-9th Grade Attendance: Number of students who had at least two performance level data points"
    IOG_ATT69_StartLT90ADA "IOG: 6th-9th Grade Attendance: Number of students who started with less than 90% average daily attendance"
    IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA"
+   BOCY_ATT69_StartLT90ADA "Best of City Year: 6th-9th Grade Attendance: Number of students on official focus lists, enrolled 56+ days, and started with less than 90% average daily attendance"
    LITMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting ELA/Literacy Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    MTHMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting Math Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    ATTMet56DosePerc "DOSAGE ACTUAL\n% of Students Enrolled 56+ Days (Attendance, out of ACTUAL FL Enrollment)"
@@ -1759,6 +1785,8 @@ AGGREGATE /OUTFILE = FINALSITEDATASET
    /IOG_LITAssess69_2PerfLvlDP = SUM(IOG_LITAssess69_2PerfLvlDP)
    /IOG_LITAssess69_StartOffSlid = SUM(IOG_LITAssess69_StartOffSlid)
    /IOG_LITAssess69_SOSMoveOn = SUM(IOG_LITAssess69_SOSMoveOn)
+   /BOCY_LITAssess35_StartOffSlid = SUM(BOCY_LITAssess35_StartOffSlid)
+   /BOCY_LITAssess69_StartOffSlid = SUM(BOCY_LITAssess69_StartOffSlid)
    /ELACG_anyRawDP = SUM(ELACG_anyRawDP)
    /ELACG_2PerfLvlDP = SUM(ELACG_2PerfLvlDP)
    /ELACG_StartOffSlid = SUM(ELACG_StartOffSlid)
@@ -1779,6 +1807,8 @@ AGGREGATE /OUTFILE = FINALSITEDATASET
    /IOG_MTHAssess69_2PerfLvlDP = SUM(IOG_MTHAssess69_2PerfLvlDP)
    /IOG_MTHAssess69_StartOffSlid = SUM(IOG_MTHAssess69_StartOffSlid)
    /IOG_MTHAssess69_SOSMoveOn = SUM(IOG_MTHAssess69_SOSMoveOn)
+   /BOCY_MTHAssess35_StartOffSlid = SUM(BOCY_MTHAssess35_StartOffSlid)
+   /BOCY_MTHAssess69_StartOffSlid = SUM(BOCY_MTHAssess69_StartOffSlid)
    /MTHCG_anyRawDP = SUM(MTHCG_anyRawDP)
    /MTHCG_2PerfLvlDP = SUM(MTHCG_2PerfLvlDP)
    /MTHCG_StartOffSlid = SUM(MTHCG_StartOffSlid)
@@ -1794,7 +1824,8 @@ AGGREGATE /OUTFILE = FINALSITEDATASET
    /IOG_ATT69_anyRawDP = SUM(IOG_ATT69_anyRawDP)
    /IOG_ATT69_2PerfLvlDP = SUM(IOG_ATT69_2PerfLvlDP)
    /IOG_ATT69_StartLT90ADA = SUM(IOG_ATT69_StartLT90ADA)
-   /IOG_ATT69_SOSMoveOn = SUM(IOG_ATT69_SOSMoveOn).
+   /IOG_ATT69_SOSMoveOn = SUM(IOG_ATT69_SOSMoveOn)
+   /BOCY_ATT69_StartLT90ADA = SUM(BOCY_ATT69_StartLT90ADA).
 
 DATASET ACTIVATE FINALSITEDATASET.
 
@@ -1894,6 +1925,8 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_LITAssess69_2PerfLvlDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
    IOG_LITAssess69_StartOffSlid "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
+   BOCY_LITAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
+   BOCY_LITAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    ELACG_anyRawDP "Number of students with at least one ELA course grade performance data point"
    ELACG_2PerfLvlDP "Number of students with at least two ELA course grade performance level data points"
    ELACG_StartOffSlid "Number of students who started off-track or sliding in ELA course grades"
@@ -1914,6 +1947,8 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
    IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   BOCY_MTHAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
+   BOCY_MTHAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    MTHCG_anyRawDP "Number of students with at least one math course grade performance data point"
    MTHCG_2PerfLvlDP "Number of students with at least two math course grade performance level data points"
    MTHCG_StartOffSlid "Number of students who started off-track or sliding in math course grades"
@@ -1930,6 +1965,7 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_ATT69_2PerfLvlDP "IOG: 6th-9th Grade Attendance: Number of students who had at least two performance level data points"
    IOG_ATT69_StartLT90ADA "IOG: 6th-9th Grade Attendance: Number of students who started with less than 90% average daily attendance"
    IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA"
+   BOCY_ATT69_StartLT90ADA "Best of City Year: 6th-9th Grade Attendance: Number of students on official focus lists, enrolled 56+ days, and started with less than 90% average daily attendance"
    LITMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting ELA/Literacy Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    MTHMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting Math Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    ATTMet56DosePerc "DOSAGE ACTUAL\n% of Students Enrolled 56+ Days (Attendance, out of ACTUAL FL Enrollment)"
