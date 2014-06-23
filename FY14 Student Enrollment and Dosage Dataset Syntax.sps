@@ -1163,6 +1163,30 @@ VALUE LABELS IOGGradeCount 0 "Does not fall within grade-level range for IOG rep
    1 "Falls within grade-level range for IOG reporting".
 EXECUTE.
 
+***** IOG Enrollment variables by lower vs. upper grade levels.
+***** Literacy.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMet30Enroll = 1) IOG_LIT35_OfficialFL = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMet30Enroll = 1) IOG_LIT69_OfficialFL = 1.
+***** Math.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMet30Enroll = 1) IOG_MTH35_OfficialFL = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMet30Enroll = 1) IOG_MTH69_OfficialFL = 1.
+***** Attendance.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet30Enroll = 1) IOG_ATT35_OfficialFL = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet30Enroll = 1) IOG_ATT69_OfficialFL = 1.
+***** Behavior.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & BEHMet30Enroll = 1) IOG_BEH35_OfficialFL = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & BEHMet30Enroll = 1) IOG_BEH69_OfficialFL = 1.
+EXECUTE.
+VARIABLE LABELS IOG_LIT35_OfficialFL "IOG: 3rd-5th Grade Literacy: Number of students on official focus lists"
+   IOG_LIT69_OfficialFL "IOG: 6th-9th Grade Literacy: Number of students on official focus lists"
+   IOG_MTH35_OfficialFL "IOG: 3rd-5th Grade Math: Number of students on official focus lists"
+   IOG_MTH69_OfficialFL "IOG: 6th-9th Grade Math: Number of students on official focus lists"
+   IOG_ATT35_OfficialFL "IOG: 3rd-5th Grade Attendance: Number of students on official focus lists"
+   IOG_ATT69_OfficialFL "IOG: 6th-9th Grade Attendance: Number of students on official focus lists"
+   IOG_BEH35_OfficialFL "IOG: 3rd-5th Grade Behavior: Number of students on official focus lists"
+   IOG_BEH69_OfficialFL "IOG: 6th-9th Grade Bheavior: Number of students on official focus lists".
+EXECUTE.
+
 ***** Literacy Assessments.
 IF (NOT MISSING(LITAssess_PRE_VALUE_NUM) | NOT MISSING(LITAssess_MY_VALUE_NUM)) LITAssess_anyRawDP = 1.
 IF (LITAssess_PRE_TRACK_EVAL ~= "" & LITAssess_MY_TRACK_EVAL ~= "") LITAssess_2PerfLvlDP = 1.
@@ -1500,6 +1524,14 @@ AGGREGATE /OUTFILE = FINALTEAMDATASET
    /MTHMetQ4Dose = SUM(MTHMetQ4Dose)
    /ATTMet56Dose = SUM(ATTMet56Dose)
    /BEHMet56Dose = SUM(BEHMet56Dose)
+   /IOG_LIT35_OfficialFL = SUM(IOG_LIT35_OfficialFL)
+   /IOG_LIT69_OfficialFL = SUM(IOG_LIT69_OfficialFL)
+   /IOG_MTH35_OfficialFL = SUM(IOG_MTH35_OfficialFL)
+   /IOG_MTH69_OfficialFL = SUM(IOG_MTH69_OfficialFL)
+   /IOG_ATT35_OfficialFL = SUM(IOG_ATT35_OfficialFL)
+   /IOG_ATT69_OfficialFL = SUM(IOG_ATT69_OfficialFL)
+   /IOG_BEH35_OfficialFL = SUM(IOG_BEH35_OfficialFL)
+   /IOG_BEH69_OfficialFL = SUM(IOG_BEH69_OfficialFL)
    /LITAssess_anyRawDP = SUM(LITAssess_anyRawDP)
    /LITAssess_2PerfLvlDP = SUM(LITAssess_2PerfLvlDP)
    /LITAssess_StartOffSlid = SUM(LITAssess_StartOffSlid)
@@ -1632,6 +1664,14 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    MTHMetQ4Dose "DOSAGE ACTUAL\nNumber of Students Meeting Math Q4 Dosage Benchmark (with overlap)"
    ATTMet56Dose "DOSAGE ACTUAL\nNumber of Students Enrolled 56+ Days (Attendance, with overlap)"
    BEHMet56Dose "DOSAGE ACTUAL\nNumber of Students Enrolled 56+ Days (Behavior, with overlap)"
+   IOG_LIT35_OfficialFL "IOG: 3rd-5th Grade Literacy: Number of students on official focus lists"
+   IOG_LIT69_OfficialFL "IOG: 6th-9th Grade Literacy: Number of students on official focus lists"
+   IOG_MTH35_OfficialFL "IOG: 3rd-5th Grade Math: Number of students on official focus lists"
+   IOG_MTH69_OfficialFL "IOG: 6th-9th Grade Math: Number of students on official focus lists"
+   IOG_ATT35_OfficialFL "IOG: 3rd-5th Grade Attendance: Number of students on official focus lists"
+   IOG_ATT69_OfficialFL "IOG: 6th-9th Grade Attendance: Number of students on official focus lists"
+   IOG_BEH35_OfficialFL "IOG: 3rd-5th Grade Behavior: Number of students on official focus lists"
+   IOG_BEH69_OfficialFL "IOG: 6th-9th Grade Bheavior: Number of students on official focus lists"
    LITAssess_anyRawDP "Number of students with at least one raw literacy assessment performance data point"
    LITAssess_2PerfLvlDP "Number of students with at least two literacy assessment performance level data points"
    LITAssess_StartOffSlid "Number of students who started off-track or sliding in literacy assessments"
@@ -1773,6 +1813,14 @@ AGGREGATE /OUTFILE = FINALSITEDATASET
    /MTHMetQ4Dose = SUM(MTHMetQ4Dose)
    /ATTMet56Dose = SUM(ATTMet56Dose)
    /BEHMet56Dose = SUM(BEHMet56Dose)
+   /IOG_LIT35_OfficialFL = SUM(IOG_LIT35_OfficialFL)
+   /IOG_LIT69_OfficialFL = SUM(IOG_LIT69_OfficialFL)
+   /IOG_MTH35_OfficialFL = SUM(IOG_MTH35_OfficialFL)
+   /IOG_MTH69_OfficialFL = SUM(IOG_MTH69_OfficialFL)
+   /IOG_ATT35_OfficialFL = SUM(IOG_ATT35_OfficialFL)
+   /IOG_ATT69_OfficialFL = SUM(IOG_ATT69_OfficialFL)
+   /IOG_BEH35_OfficialFL = SUM(IOG_BEH35_OfficialFL)
+   /IOG_BEH69_OfficialFL = SUM(IOG_BEH69_OfficialFL)
    /LITAssess_anyRawDP = SUM(LITAssess_anyRawDP)
    /LITAssess_2PerfLvlDP = SUM(LITAssess_2PerfLvlDP)
    /LITAssess_StartOffSlid = SUM(LITAssess_StartOffSlid)
@@ -1913,6 +1961,14 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    MTHMetQ4Dose "DOSAGE ACTUAL\nNumber of Students Meeting Math Q4 Dosage Benchmark (with overlap)"
    ATTMet56Dose "DOSAGE ACTUAL\nNumber of Students Enrolled 56+ Days (Attendance, with overlap)"
    BEHMet56Dose "DOSAGE ACTUAL\nNumber of Students Enrolled 56+ Days (Behavior, with overlap)"
+   IOG_LIT35_OfficialFL "IOG: 3rd-5th Grade Literacy: Number of students on official focus lists"
+   IOG_LIT69_OfficialFL "IOG: 6th-9th Grade Literacy: Number of students on official focus lists"
+   IOG_MTH35_OfficialFL "IOG: 3rd-5th Grade Math: Number of students on official focus lists"
+   IOG_MTH69_OfficialFL "IOG: 6th-9th Grade Math: Number of students on official focus lists"
+   IOG_ATT35_OfficialFL "IOG: 3rd-5th Grade Attendance: Number of students on official focus lists"
+   IOG_ATT69_OfficialFL "IOG: 6th-9th Grade Attendance: Number of students on official focus lists"
+   IOG_BEH35_OfficialFL "IOG: 3rd-5th Grade Behavior: Number of students on official focus lists"
+   IOG_BEH69_OfficialFL "IOG: 6th-9th Grade Bheavior: Number of students on official focus lists"
    LITAssess_anyRawDP "Number of students with at least one raw literacy assessment performance data point"
    LITAssess_2PerfLvlDP "Number of students with at least two literacy assessment performance level data points"
    LITAssess_StartOffSlid "Number of students who started off-track or sliding in literacy assessments"
