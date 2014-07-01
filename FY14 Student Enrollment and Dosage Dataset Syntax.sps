@@ -281,6 +281,7 @@ EXECUTE.
 IF (cyschSchoolRefID = "001U0000008x3NoIAI" & StudentGrade < 9) DN_SCHOOL_BY_GRADE = 0 /*CBS-Linden STEM*/ .
 IF (cyschSchoolRefID = "001U000000O3C8PIAV" & StudentGrade < 9) DN_SCHOOL_BY_GRADE = 0 /*CBS-South HS*/ .
 IF (cyschSchoolRefID = "001U000000EJ6m5IAD" & StudentGrade > 9) DN_SCHOOL_BY_GRADE = 0 /*JAX-Andrew Jackson High School*/ .
+IF (cyschSchoolRefID = "001U000000YueJpIAJ") DN_SCHOOL_BY_GRADE = 0 /*TUL-Clinton MS*/ .
 EXECUTE.
 VARIABLE LABELS DN_SCHOOL_BY_GRADE "Diplomas Now Students (accounting for variation in school)".
 VALUE LABELS DN_SCHOOL_BY_GRADE 0 "Not a Diplomas Now Student"
@@ -1052,8 +1053,9 @@ DATASET CLOSE ATTPerf.
 ****************************************************************************************************
 ***** TEMP FIXES:.
 *****     Overriding Q4 dosage goals to 6 hours for DN schools, with the exception.
-*****          of CY Columbus (Linden McKinley and South HS) and CY Jacksonville (Andrew Jackson HS).
-DO IF (DNSchool = 1 & cyschSchoolRefID ~= "001U0000008x3NoIAI" & cyschSchoolRefID ~= "001U000000O3C8PIAV" & cyschSchoolRefID ~= "001U000000EJ6m5IAD").
+*****          of CY Columbus (Linden McKinley and South HS), CY Jacksonville (Andrew Jackson HS),.
+*****          and CY Tulsa (Clinton MS).
+DO IF (DNSchool = 1 & cyschSchoolRefID ~= "001U0000008x3NoIAI" & cyschSchoolRefID ~= "001U000000O3C8PIAV" & cyschSchoolRefID ~= "001U000000EJ6m5IAD" & cyschSchoolRefID ~= "001U000000YueJpIAJ").
 COMPUTE TEAMELAQ4DoseGoal = 6.
 COMPUTE TEAMMTHQ4DoseGoal = 6.
 COMPUTE TEAMELAQ4DoseGoalMin = TEAMELAQ4DoseGoal * 60.
