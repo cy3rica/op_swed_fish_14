@@ -1065,14 +1065,14 @@ EXECUTE.
 ****************************************************************************************************
 
 ***** Calculate Met/Not Met Enrollment Variables -- ALL STUDENTS -- USE FOR DATA ENTRY MONITORING.
-IF (LITEnroll >= 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30EnrollALL = 1.
-IF (LITEnroll < 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30EnrollALL = 0.
-IF (MTHEnroll >= 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30EnrollALL = 1.
-IF (MTHEnroll < 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30EnrollALL = 0.
-IF (ATTEnroll >= 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30EnrollALL = 1.
-IF (ATTEnroll < 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30EnrollALL = 0.
-IF (BEHEnroll >= 30  & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30EnrollALL = 1.
-IF (BEHEnroll < 30 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30EnrollALL = 0.
+IF (LITEnroll >= 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(07,01,2014)) LITMet30EnrollALL = 1.
+IF (LITEnroll < 30 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(07,01,2014)) LITMet30EnrollALL = 0.
+IF (MTHEnroll >= 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(07,01,2014)) MTHMet30EnrollALL = 1.
+IF (MTHEnroll < 30 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(07,01,2014)) MTHMet30EnrollALL = 0.
+IF (ATTEnroll >= 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(07,01,2014)) ATTMet30EnrollALL = 1.
+IF (ATTEnroll < 30 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(07,01,2014)) ATTMet30EnrollALL = 0.
+IF (BEHEnroll >= 30  & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(07,01,2014)) BEHMet30EnrollALL = 1.
+IF (BEHEnroll < 30 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(07,01,2014)) BEHMet30EnrollALL = 0.
 VARIABLE LABELS LITMet30EnrollALL "Number of Students Enrolled 30+ Days (ELA/Literacy, with overlap, regardless of IA-assignment)"
    MTHMet30EnrollALL "Number of Students Enrolled 30+ Days (Math, with overlap, regardless of IA-assignment)"
    ATTMet30EnrollALL "Number of Students Enrolled 30+ Days (Attendance, with overlap, regardless of IA-assignment)"
@@ -1082,14 +1082,14 @@ VALUE LABELS LITMet30EnrollALL MTHMet30EnrollALL ATTMet30EnrollALL BEHMet30Enrol
 EXECUTE.
 
 ***** Calculate Met/Not Met Enrollment Variables -- IA-ASSIGNED STUDENTS ONLY, USE THESE FOR ANALYSIS TO COUNT/SELECT OFFICIAL FL #s.
-IF (LITEnroll >= 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30Enroll = 1.
-IF (LITEnroll < 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(06,30,2014)) LITMet30Enroll = 0.
-IF (MTHEnroll >= 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30Enroll = 1.
-IF (MTHEnroll < 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(06,30,2014)) MTHMet30Enroll = 0.
-IF (ATTEnroll >= 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30Enroll = 1.
-IF (ATTEnroll < 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(06,30,2014)) ATTMet30Enroll = 0.
-IF (BEHEnroll >= 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30Enroll = 1.
-IF (BEHEnroll < 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(06,30,2014)) BEHMet30Enroll = 0.
+IF (LITEnroll >= 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(07,01,2014)) LITMet30Enroll = 1.
+IF (LITEnroll < 30 & IALIT = 1 & EnrollDate.LIT >= DATE.MDY(07,1,2013) & ExitDate.LIT <= DATE.MDY(07,01,2014)) LITMet30Enroll = 0.
+IF (MTHEnroll >= 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(07,01,2014)) MTHMet30Enroll = 1.
+IF (MTHEnroll < 30 & IAMTH = 1 & EnrollDate.MTH >= DATE.MDY(07,1,2013) & ExitDate.MTH <= DATE.MDY(07,01,2014)) MTHMet30Enroll = 0.
+IF (ATTEnroll >= 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(07,01,2014)) ATTMet30Enroll = 1.
+IF (ATTEnroll < 30 & IAATT = 1 & EnrollDate.ATT >= DATE.MDY(07,1,2013) & ExitDate.ATT <= DATE.MDY(07,01,2014)) ATTMet30Enroll = 0.
+IF (BEHEnroll >= 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(07,01,2014)) BEHMet30Enroll = 1.
+IF (BEHEnroll < 30 & IABEH = 1 & EnrollDate.BEH >= DATE.MDY(07,1,2013) & ExitDate.BEH <= DATE.MDY(07,01,2014)) BEHMet30Enroll = 0.
 VARIABLE LABELS LITMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (ELA/Literacy, with overlap)"
    MTHMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Math, with overlap)"
    ATTMet30Enroll "ENROLL ACTUAL\nNumber of Students Enrolled 30+ Days (Attendance, with overlap)"
