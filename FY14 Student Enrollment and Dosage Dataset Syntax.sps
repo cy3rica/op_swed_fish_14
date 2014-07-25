@@ -7,7 +7,7 @@
 *****     - Make sure to save FY14 school name to ID translation in FY14 cross instrument source data file folder.
 ************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************
-***** FYI -- LINES 171 TO END OF FILE SHOULD BE IDENTICAL TO FILE FY14 STUDENT ENROLLMENT AND DOSAGE DATASET SYNTAX - TIME MACHINE.
+***** FYI -- LINES 179 TO END OF FILE SHOULD BE IDENTICAL TO FILE FY14 STUDENT ENROLLMENT AND DOSAGE DATASET SYNTAX - TIME MACHINE.
 ************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************
 ***** Pull up and define source data files -- don't forget to make sure all ID variables are identical size/format.
@@ -45,7 +45,7 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\dbo_RPT_STUDENT_MAIN 2014.05.30
 DATASET NAME StPerfIDs.
 
 ***** Pull up literacy assessment performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_LIT_ASSESS 2014.05.30.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY LIT ASSESS 2014.07.25.sav".
 DATASET NAME LITAssessPerf.
 
 ***** Pull up math assessment performance data.
@@ -63,6 +63,14 @@ DATASET NAME MTHCGPerf.
 ***** Pull up attendance performance data.
 GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ATT 2014.05.30.sav".
 DATASET NAME ATTPerf.
+
+***** Pull up behavior rubric performance data.
+*GET FILE = "".
+*DATASET NAME BEHRUBPerf.
+
+***** Pull up behavior school-based performance data.
+*GET FILE = "".
+*DATASET NAME BEHSCHPerf.
 
 ***** Pull up Diplomas Now Attendance and Behavior dataset.
 GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Diplomas Now Attendance Behavior Data 2014.07.24.sav".
@@ -770,25 +778,19 @@ DATASET CLOSE StPerfIDs.
 ***** Prep literacy assessment data file for merge.
 DATASET ACTIVATE LITAssessPerf.
 ***** Delete unnecessary variables.
-DELETE VARIABLES dbo_RPT_STUDENT_MAINSITE_NAME dbo_RPT_STUDENT_MAINSCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID
-DIPLOMAS_NOW_SCHOOL prepostSCHOOL_ID ASSESSMENT_TYPE PRE_VALUE PRE_TRACK_NATIONAL POST_VALUE POST_VALUE_DISPLAY
-POST_VALUE_NUM POST_DATE POST_DESC POST_TRACK POST_TRACK_EVAL POST_TRACK_NATIONAL DOSAGE_CATEGORY TTL_TIME
-ENROLLED_DAYS_CATEGORIES CURRENTLY_ENROLLED ENROLLED_DAYS LIT_ASSESS_RAWCHANGE LIT_ASSESS_RAWCHANGE_DEGREE
-LIT_ASSESS_PERFORMANCECHANGE_LOCAL LIT_ASSESS_PERFORMANCECHANGE_NORMALIZED LIT_ASSESS_PERCENTCHANGE
-STATUS_SITE_DOSAGE_GOAL SITE_DOSAGE_GOAL Attendance_IA ELA_IA Math_IA Behavior_IA CONFIG_ID MY_PROXY_LITAssessSTUDENT_ID
-FREQUENCY_PERIOD_ID SKILL_ID SKILL_DESCRIPTION INTERVAL INDICATOR_DESC FREQ_SORT MY_PROXY_LITAssessSCHOOL_NAME
-MY_PROXY_LITAssessSITE_NAME STUDENT_NAME MY_PROXY_LITAssessSCHOOL_ID SITE_ID PERF_DATE PERFORMANCE_VALUE
-PERFORMANCE_VALUE_NUMERIC SCALE_LOCAL SCALE_EVAL SCALE_TYPE PERF_DIRECTION PROC_TYPE PERF_RUN_DATE INDICATOR_AREA_ID
-CONFIG_NAME PRIMARY_CM INTERVENTION_TIME DATA_POINT CG_VALUE_DISPLAY CG_VALUE_NUM CG_LETTER_VIEW CG_LETTER_VIEW_ALL Tag
-dbo_RPT_SCHOOL_GRADESCHOOL_ID dbo_RPT_SCHOOL_GRADEGRADE_ID INDICATOR_ID B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4
-B_RULE_VAL5 GRADE_ID_RECODE DN_SCHOOL_BY_GRADE MY_MET_Q3_DOSAGE MY_IN_IOG_GRADE_RANGE.
+DELETE VARIABLES SITE_NAME SCHOOL_NAME GRADE_ID DIPLOMAS_NOW_SCHOOL SCHOOL_ID ASSESSMENT_TYPE PRE_VALUE
+PRE_TRACK_NATIONAL POST_VALUE POST_TRACK_NATIONAL DOSAGE_CATEGORY TTL_TIME ENROLLED_DAYS_CATEGORIES CURRENTLY_ENROLLED
+ENROLLED_DAYS LIT_ASSESS_RAWCHANGE LIT_ASSESS_PERCENTCHANGE STATUS_SITE_DOSAGE_GOAL SITE_DOSAGE_GOAL Attendance_IA
+ELA_IA Math_IA Behavior_IA INDICATOR_ID B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4 B_RULE_VAL5 GRADE_ID_RECODE
+EOY_MET_Q3_DOSAGE DN_SCHOOL_BY_GRADE EOY_IN_IOG_GRADE_RANGE.
 ***** Rename linking ID variable.
-RENAME VARIABLES (prepostSTUDENT_ID = cysdStudentID) (PRE_VALUE_DISPLAY = LITAssess_PRE_VALUE_DISPLAY)
+RENAME VARIABLES (STUDENT_ID = cysdStudentID) (PRE_VALUE_DISPLAY = LITAssess_PRE_VALUE_DISPLAY)
 (PRE_VALUE_NUM = LITAssess_PRE_VALUE_NUM) (PRE_DATE = LITAssess_PRE_DATE) (PRE_DESC = LITAssess_PRE_DESC)
-(PRE_TRACK = LITAssess_PRE_TRACK) (PRE_TRACK_EVAL = LITAssess_PRE_TRACK_EVAL) (MY_PERF_DATE = LITAssess_MY_PERF_DATE)
-(MY_DESC = LITAssess_MY_DESC) (MY_VALUE_NUM = LITAssess_MY_VALUE_NUM) (MY_TRACK = LITAssess_MY_TRACK)
-(MY_TRACK_EVAL = LITAssess_MY_TRACK_EVAL) (MY_RAWCHANGE_DEGREE = LITAssess_MY_RAWCHANGE_DEG)
-(MY_PERFORMANCECHANGE_LOCAL = LITAssess_MY_PERFCHANGE_LOCAL) (MY_PERFORMANCECHANGE_NORMALIZED = LITAssess_MY_PERFCHANGE_NORM).
+(PRE_TRACK = LITAssess_PRE_TRACK) (PRE_TRACK_EVAL = LITAssess_PRE_TRACK_EVAL) (POST_VALUE_DISPLAY = LITAssess_POST_VALUE_DISPLAY)
+(POST_VALUE_NUM = LITAssess_POST_VALUE_NUM) (POST_DATE = LITAssess_POST_DATE) (POST_DESC = LITAssess_POST_DESC)
+(POST_TRACK = LITAssess_POST_TRACK) (POST_TRACK_EVAL = LITAssess_POST_TRACK_EVAL)
+(LIT_ASSESS_RAWCHANGE_DEGREE = LITAssess_RAWCHANGE_DEG) (LIT_ASSESS_PERFORMANCECHANGE_LOCAL = LITAssess_PERFCHANGE_LOCAL)
+(LIT_ASSESS_PERFORMANCECHANGE_NORMALIZED = LITAssess_PERFCHANGE_NORM).
 ***** Add variable labels for existing variables.
 VARIABLE LABELS LITAssess_PRE_VALUE_DISPLAY "Literacy Assessments: pre raw score (display)"
 LITAssess_PRE_VALUE_NUM "Literacy Assessments: pre raw score (numeric)"
@@ -796,14 +798,15 @@ LITAssess_PRE_DATE "Literacy Assessments: pre date"
 LITAssess_PRE_DESC "Literacy Assessments: pre assessment type"
 LITAssess_PRE_TRACK "Literacy Assessments: pre performance level"
 LITAssess_PRE_TRACK_EVAL "Literacy Assessments: pre performance level (normalized)"
-LITAssess_MY_PERF_DATE "Literacy Assessments: MY post/proxy-post date"
-LITAssess_MY_DESC "Literacy Assessments: MY post/proxy-post assessment type"
-LITAssess_MY_VALUE_NUM "Literacy Assessments: MY post/proxy-post raw score (numeric)"
-LITAssess_MY_TRACK "Literacy Assessments: MY post/proxy-post performance level"
-LITAssess_MY_TRACK_EVAL "Literacy Assessments: MY post/proxy-post performance level (normalized)"
-LITAssess_MY_RAWCHANGE_DEG "Literacy Assessments: MY post/proxy-post raw score change (degree)"
-LITAssess_MY_PERFCHANGE_LOCAL "Literacy Assessments: MY post/proxy-post change in performance level"
-LITAssess_MY_PERFCHANGE_NORM "Literacy Assessments: MY post/proxy-post change in performance level (normalized)".
+LITAssess_POST_VALUE_DISPLAY "Literacy Assessments: post raw score (display)"
+LITAssess_POST_VALUE_NUM "Literacy Assessments: post raw score (numeric)"
+LITAssess_POST_DATE "Literacy Assessments: post date"
+LITAssess_POST_DESC "Literacy Assessments: post assessment type"
+LITAssess_POST_TRACK "Literacy Assessments: post performance level"
+LITAssess_POST_TRACK_EVAL "Literacy Assessments: post performance level (normalized)"
+LITAssess_RAWCHANGE_DEG "Literacy Assessments: pre to post raw score change (degree)"
+LITAssess_PERFCHANGE_LOCAL "Literacy Assessments: pre to post change in performance level"
+LITAssess_PERFCHANGE_NORM "Literacy Assessments: pre to post change in performance level (normalized)".
 EXECUTE.
 SORT CASES BY cysdStudentID (A).
 EXECUTE.
@@ -1337,12 +1340,12 @@ VARIABLE LABELS IOG_LIT35_OfficialFL "IOG: 3rd-5th Grade Literacy: Number of stu
 EXECUTE.
 
 ***** Literacy Assessments.
-IF (NOT MISSING(LITAssess_PRE_VALUE_NUM) | NOT MISSING(LITAssess_MY_VALUE_NUM)) LITAssess_anyRawDP = 1.
-IF (LITAssess_PRE_TRACK_EVAL ~= "" & LITAssess_MY_TRACK_EVAL ~= "") LITAssess_2PerfLvlDP = 1.
+IF (NOT MISSING(LITAssess_PRE_VALUE_NUM) | NOT MISSING(LITAssess_POST_VALUE_NUM)) LITAssess_anyRawDP = 1.
+IF (LITAssess_PRE_TRACK_EVAL ~= "" & LITAssess_POST_TRACK_EVAL ~= "") LITAssess_2PerfLvlDP = 1.
 EXECUTE.
 IF (LITAssess_2PerfLvlDP = 1 & (LITAssess_PRE_TRACK_EVAL = "SLIDING" | LITAssess_PRE_TRACK_EVAL = "OFF TRACK")) LITAssess_StartOffSlid = 1.
 EXECUTE.
-IF (LITAssess_StartOffSlid = 1 & LITAssess_MY_TRACK_EVAL = "ON TRACK") LITAssess_SOSMoveOn = 1.
+IF (LITAssess_StartOffSlid = 1 & LITAssess_POST_TRACK_EVAL = "ON TRACK") LITAssess_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 3-5 Literacy: X% or more of students move from below benchmark on literacy skills assessment to at/above benchmark.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_anyRawDP = 1) IOG_LITAssess35_anyRawDP = 1.
