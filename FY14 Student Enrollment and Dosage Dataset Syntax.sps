@@ -49,7 +49,7 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY LIT ASSESS 2014.07.25.
 DATASET NAME LITAssessPerf.
 
 ***** Pull up math assessment performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_MTH_ASSESS 2014.05.30.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY MTH ASSESS 2014.07.25.sav".
 DATASET NAME MTHAssessPerf.
 
 ***** Pull up ELA course grade performance data.
@@ -833,26 +833,20 @@ DATASET CLOSE LITAssessPerf.
 ***** Prep math assessment data file for merge.
 DATASET ACTIVATE MTHAssessPerf.
 ***** Delete unnecessary variables.
-DELETE VARIABLES dbo_RPT_STUDENT_MAINSITE_NAME dbo_RPT_STUDENT_MAINSCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID
-DIPLOMAS_NOW_SCHOOL prepostSCHOOL_ID ASSESSMENT_TYPE PRE_VALUE PRE_TRACK_NATIONAL POST_VALUE POST_VALUE_DISPLAY
-POST_VALUE_NUM POST_DATE POST_DESC POST_TRACK POST_TRACK_EVAL POST_TRACK_NATIONAL DOSAGE_CATEGORY TTL_TIME
-ENROLLED_DAYS_CATEGORIES CURRENTLY_ENROLLED ENROLLED_DAYS LIT_ASSESS_RAWCHANGE LIT_ASSESS_RAWCHANGE_DEGREE
-LIT_ASSESS_PERFORMANCECHANGE_LOCAL LIT_ASSESS_PERFORMANCECHANGE_NORMALIZED LIT_ASSESS_PERCENTCHANGE
-STATUS_SITE_DOSAGE_GOAL SITE_DOSAGE_GOAL Attendance_IA ELA_IA Math_IA Behavior_IA CONFIG_ID MY_PROXY_MTHAssessSTUDENT_ID
-FREQUENCY_PERIOD_ID SKILL_ID SKILL_DESCRIPTION INTERVAL INDICATOR_DESC FREQ_SORT MY_PROXY_MTHAssessSCHOOL_NAME
-MY_PROXY_MTHAssessSITE_NAME STUDENT_NAME MY_PROXY_MTHAssessSCHOOL_ID SITE_ID PERF_DATE PERFORMANCE_VALUE
-PERFORMANCE_VALUE_NUMERIC SCALE_LOCAL SCALE_EVAL SCALE_TYPE PERF_DIRECTION PROC_TYPE PERF_RUN_DATE INDICATOR_AREA_ID
-CONFIG_NAME PRIMARY_CM INTERVENTION_TIME DATA_POINT CG_VALUE_DISPLAY CG_VALUE_NUM CG_LETTER_VIEW CG_LETTER_VIEW_ALL
-Tag dbo_RPT_SCHOOL_GRADESCHOOL_ID dbo_RPT_SCHOOL_GRADEGRADE_ID INDICATOR_ID B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4
-B_RULE_VAL5 GRADE_ID_RECODE DN_SCHOOL_BY_GRADE MY_MET_Q3_DOSAGE MY_IN_IOG_GRADE_RANGE.
+DELETE VARIABLES SITE_NAME SCHOOL_NAME GRADE_ID DIPLOMAS_NOW_SCHOOL SCHOOL_ID ASSESSMENT_TYPE PRE_VALUE
+PRE_TRACK_NATIONAL POST_VALUE POST_TRACK_NATIONAL DOSAGE_CATEGORY TTL_TIME ENROLLED_DAYS_CATEGORIES
+CURRENTLY_ENROLLED ENROLLED_DAYS LIT_ASSESS_RAWCHANGE LIT_ASSESS_PERCENTCHANGE STATUS_SITE_DOSAGE_GOAL
+SITE_DOSAGE_GOAL Attendance_IA ELA_IA Math_IA Behavior_IA INDICATOR_ID B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4
+B_RULE_VAL5 GRADE_ID_RECODE EOY_MET_Q3_DOSAGE DN_SCHOOL_BY_GRADE EOY_IN_IOG_GRADE_RANGE.
 ***** Rename linking ID variable.
-RENAME VARIABLES (prepostSTUDENT_ID = cysdStudentID) (PRE_VALUE_DISPLAY = MTHAssess_PRE_VALUE_DISPLAY)
+RENAME VARIABLES (STUDENT_ID = cysdStudentID) (PRE_VALUE_DISPLAY = MTHAssess_PRE_VALUE_DISPLAY)
 (PRE_VALUE_NUM = MTHAssess_PRE_VALUE_NUM) (PRE_DATE = MTHAssess_PRE_DATE) (PRE_DESC = MTHAssess_PRE_DESC)
-(PRE_TRACK = MTHAssess_PRE_TRACK) (PRE_TRACK_EVAL = MTHAssess_PRE_TRACK_EVAL) (MY_PERF_DATE = MTHAssess_MY_PERF_DATE)
-(MY_DESC = MTHAssess_MY_DESC) (MY_VALUE_NUM = MTHAssess_MY_VALUE_NUM) (MY_TRACK = MTHAssess_MY_TRACK)
-(MY_TRACK_EVAL = MTHAssess_MY_TRACK_EVAL) (MY_RAWCHANGE_DEGREE = MTHAssess_MY_RAWCHANGE_DEG)
-(MY_PERFORMANCECHANGE_LOCAL = MTHAssess_MY_PERFCHANGE_LOCAL)
-(MY_PERFORMANCECHANGE_NORMALIZED = MTHAssess_MY_PERFCHANGE_NORM).
+(PRE_TRACK = MTHAssess_PRE_TRACK) (PRE_TRACK_EVAL = MTHAssess_PRE_TRACK_EVAL)
+(POST_VALUE_DISPLAY = MTHAssess_POST_VALUE_DISPLAY) (POST_VALUE_NUM = MTHAssess_POST_VALUE_NUM)
+(POST_DATE = MTHAssess_POST_DATE) (POST_DESC = MTHAssess_POST_DESC) (POST_TRACK = MTHAssess_POST_TRACK)
+(POST_TRACK_EVAL = MTHAssess_POST_TRACK_EVAL) (LIT_ASSESS_RAWCHANGE_DEGREE = MTHAssess_RAWCHANGE_DEG)
+(LIT_ASSESS_PERFORMANCECHANGE_LOCAL = MTHAssess_PERFCHANGE_LOCAL)
+(LIT_ASSESS_PERFORMANCECHANGE_NORMALIZED = MTHAssess_PERFCHANGE_NORM).
 ***** Add variable labels for existing variables.
 VARIABLE LABELS MTHAssess_PRE_VALUE_DISPLAY "Math Assessments: pre raw score (display)"
 MTHAssess_PRE_VALUE_NUM "Math Assessments: pre raw score (numeric)"
@@ -860,14 +854,15 @@ MTHAssess_PRE_DATE "Math Assessments: pre date"
 MTHAssess_PRE_DESC "Math Assessments: pre assessment type"
 MTHAssess_PRE_TRACK "Math Assessments: pre performance level (local)"
 MTHAssess_PRE_TRACK_EVAL "Math Assessments: pre performance level (normalized)"
-MTHAssess_MY_PERF_DATE "Math Assessments: post/proxy-post date"
-MTHAssess_MY_DESC "Math Assessments: post/proxy-post assessment type"
-MTHAssess_MY_VALUE_NUM "Math Assessments: post/proxy-post raw score (numeric)"
-MTHAssess_MY_TRACK "Math Assessments: post/proxy-post performance level (local)"
-MTHAssess_MY_TRACK_EVAL "Math Assessments: post/proxy-post performance level (normalized)"
-MTHAssess_MY_RAWCHANGE_DEG "Math Assessments: post/proxy-post change in raw score (degree)"
-MTHAssess_MY_PERFCHANGE_LOCAL "Math Assessments: post/proxy-post change in performance level (local)"
-MTHAssess_MY_PERFCHANGE_NORM "Math Assessments: post/proxy-post change in performance level (normalized)".
+MTHAssess_POST_VALUE_DISPLAY "Math Assessments: post raw score (display)"
+MTHAssess_POST_VALUE_NUM "Math Assessments: post raw score (numeric)"
+MTHAssess_POST_DATE "Math Assessments: post date"
+MTHAssess_POST_DESC "Math Assessments: post assessment type"
+MTHAssess_POST_TRACK "Math Assessments: post performance level (local)"
+MTHAssess_POST_TRACK_EVAL "Math Assessments: post performance level (normalized)"
+MTHAssess_RAWCHANGE_DEG "Math Assessments: pre to post change in raw score (degree)"
+MTHAssess_PERFCHANGE_LOCAL "Math Assessments: pre to post change in performance level (local)"
+MTHAssess_PERFCHANGE_NORM "Math Assessments: pre to post change in performance level (normalized)".
 EXECUTE.
 SORT CASES BY cysdStudentID (A).
 EXECUTE.
@@ -1404,12 +1399,12 @@ VARIABLE LABELS ELACG_anyRawDP "Number of students with at least one ELA course 
 EXECUTE.
 
 ***** Math Assessments.
-IF (NOT MISSING(MTHAssess_PRE_VALUE_NUM) | NOT MISSING(MTHAssess_MY_VALUE_NUM)) MTHAssess_anyRawDP = 1.
-IF (MTHAssess_PRE_TRACK_EVAL ~= "" & MTHAssess_MY_TRACK_EVAL ~= "") MTHAssess_2PerfLvlDP = 1.
+IF (NOT MISSING(MTHAssess_PRE_VALUE_NUM) | NOT MISSING(MTHAssess_POST_VALUE_NUM)) MTHAssess_anyRawDP = 1.
+IF (MTHAssess_PRE_TRACK_EVAL ~= "" & MTHAssess_POST_TRACK_EVAL ~= "") MTHAssess_2PerfLvlDP = 1.
 EXECUTE.
 IF (MTHAssess_2PerfLvlDP = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) MTHAssess_StartOffSlid = 1.
 EXECUTE.
-IF (MTHAssess_StartOffSlid = 1 & MTHAssess_MY_TRACK_EVAL = "ON TRACK") MTHAssess_SOSMoveOn = 1.
+IF (MTHAssess_StartOffSlid = 1 & MTHAssess_POST_TRACK_EVAL = "ON TRACK") MTHAssess_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 3-5 Math: 25% or more of students move from below benchmark on math skills assessment to at/above benchmark.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_anyRawDP = 1) IOG_MTHAssess35_anyRawDP = 1.
