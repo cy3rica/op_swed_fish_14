@@ -7,7 +7,7 @@
 *****     - Make sure to save FY14 school name to ID translation in FY14 cross instrument source data file folder.
 ************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************
-***** FYI -- LINES 161 TO END OF FILE SHOULD BE IDENTICAL TO FILE FY14 STUDENT ENROLLMENT AND DOSAGE DATASET SYNTAX - TIME MACHINE.
+***** FYI -- LINES 171 TO END OF FILE SHOULD BE IDENTICAL TO FILE FY14 STUDENT ENROLLMENT AND DOSAGE DATASET SYNTAX - TIME MACHINE.
 ************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************
 ***** Pull up and define source data files -- don't forget to make sure all ID variables are identical size/format.
@@ -29,7 +29,7 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\cychannel FY14 List of Schools 
 DATASET NAME cychanSchoolInfo.
 
 ***** Pull up site/team-level enrollment and dosage goals.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_Enrollment and Dosage Targets FINAL 2014.06.19.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_Enrollment and Dosage Targets FINAL 2014.07.22.sav".
 DATASET NAME SiteTeamEnrollDosage.
 
 ***** Pull up AmeriCorps grant ID translation file.
@@ -63,6 +63,14 @@ DATASET NAME MTHCGPerf.
 ***** Pull up attendance performance data.
 GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ATT 2014.05.30.sav".
 DATASET NAME ATTPerf.
+
+***** Pull up Diplomas Now Attendance and Behavior dataset.
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Diplomas Now Attendance Behavior Data 2014.07.24.sav".
+DATASET NAME DNATTBEH.
+
+***** Pull up DESSA dataset.
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Final DESSA Dataset 6.25.14 - with IDs.sav".
+DATASET NAME DESSA.
 
 ************************************************************************************************************************************************************************************
 ***** Activate and prep student enrollment dosage data for merge/aggregation.
@@ -117,8 +125,9 @@ AGGREGATE
 DATASET ACTIVATE StudentIAData.
 
 ***** Calculate latest exit date (this calculation needs to be done in case a student has been exited from one section, but may still be enrolled in another section).
+***** Note (7/21/14): for students missing exit dates, we're assuming an exit date of 7/1 (date of system close).
 DO IF (ExitMissing > 0).
-COMPUTE ExitDate = XDATE.DATE($TIME).
+COMPUTE ExitDate = DATE.MDY(07,01,2014) /*XDATE.DATE($TIME)*/ .
 ELSE IF (ExitMissing = 0).
 COMPUTE ExitDate = ExitDateLatest.
 END IF.
@@ -758,7 +767,7 @@ DATASET CLOSE StPerfIDs.
 ***** Merge in literacy assessment performance data.
 ************************************************************************************************************************************************************************************
 
-***** Prep student ID translation file for merge.
+***** Prep literacy assessment data file for merge.
 DATASET ACTIVATE LITAssessPerf.
 ***** Delete unnecessary variables.
 DELETE VARIABLES dbo_RPT_STUDENT_MAINSITE_NAME dbo_RPT_STUDENT_MAINSCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID
@@ -818,7 +827,7 @@ DATASET CLOSE LITAssessPerf.
 ***** Merge in math assessment performance data.
 ************************************************************************************************************************************************************************************
 
-***** Prep student ID translation file for merge.
+***** Prep math assessment data file for merge.
 DATASET ACTIVATE MTHAssessPerf.
 ***** Delete unnecessary variables.
 DELETE VARIABLES dbo_RPT_STUDENT_MAINSITE_NAME dbo_RPT_STUDENT_MAINSCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID
@@ -879,7 +888,7 @@ DATASET CLOSE MTHAssessPerf.
 ***** Merge in ELA CG performance data.
 ************************************************************************************************************************************************************************************
 
-***** Prep student ID translation file for merge.
+***** Prep ELA course grade data file for merge.
 DATASET ACTIVATE ELACGPerf.
 ***** Delete unnecessary variables.
 DELETE VARIABLES dbo_RPT_STUDENT_MAINSITE_NAME dbo_RPT_STUDENT_MAINSCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID
@@ -935,7 +944,7 @@ DATASET CLOSE ELACGPerf.
 ***** Merge in math CG performance data.
 ************************************************************************************************************************************************************************************
 
-***** Prep student ID translation file for merge.
+***** Prep math course grade data file for merge.
 DATASET ACTIVATE MTHCGPerf.
 ***** Delete unnecessary variables.
 DELETE VARIABLES dbo_RPT_STUDENT_MAINSITE_NAME dbo_RPT_STUDENT_MAINSCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID
@@ -991,7 +1000,7 @@ DATASET CLOSE MTHCGPerf.
 ***** Merge in attendance performance data.
 ************************************************************************************************************************************************************************************
 
-***** Prep student ID translation file for merge.
+***** Prep attendance performance data file for merge.
 DATASET ACTIVATE ATTPerf.
 ***** Delete unnecessary variables.
 DELETE VARIABLES SITE_NAME SCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID DIPLOMAS_NOW_SCHOOL PRE_SKILL_DESC PRE_SCENARIO
@@ -1045,6 +1054,132 @@ EXECUTE.
 
 ***** No longer need the attendance dataset.
 DATASET CLOSE ATTPerf.
+
+************************************************************************************************************************************************************************************
+***** Merge in Diplomas Now attendance and behavior performance data.
+************************************************************************************************************************************************************************************
+
+***** Prep Diplomas Now attendance and behavior data file for merge.
+DATASET ACTIVATE DNATTBEH.
+***** Delete unnecessary variables.
+DELETE VARIABLES Location School LocalStudentID StudentGrade ATTFLMetDosage BEHFLMetDosage DNSchool.
+***** Rename variables.
+RENAME VARIABLES (Q1AverageDailyAttendance = DNATTQ1ADA) (Q4AverageDailyAttendance = DNATTQ4ADA)
+(@1213AverageDailyAttendance = DNATTPrYrADA) (@1314AverageDailyAttendance = DNATTCumulADA)
+(Q1SuspensionsNum = DNBEHQ1SUS) (Q4SuspensionsNum = DNBEHQ4SUS).
+***** Add variable labels for existing variables.
+VARIABLE LABELS DNATTQ1ADA "Diplomas Now: Attendance: Q1 Average Daily Attendance"
+   DNATTQ4ADA "Diplomas Now: Attendance: Q4 Average Daily Attendance"
+   DNATTPrYrADA "Diplomas Now: Attendance: Prior Year Average Daily Attendance"
+   DNATTCumulADA "Diplomas Now: Attendance: Current Year Cumulative ADA"
+   DNBEHQ1SUS "Diplomas Now: Behavior: Q1 Suspensions"
+   DNBEHQ4SUS "Diplomas Now: Behavior: Q4 Suspensions".
+EXECUTE.
+SORT CASES BY cyStudentID (A).
+EXECUTE.
+
+***** Prep final dataset for merge.
+DATASET ACTIVATE FINALDATASET.
+SORT CASES BY cyStudentID (A).
+EXECUTE.
+
+***** Merge student IDs to final dataset.
+MATCH FILES /FILE = FINALDATASET
+   /TABLE = DNATTBEH
+   /BY cyStudentID.
+DATASET NAME FINALDATASET.
+EXECUTE.
+
+***** No longer need the DN attendance/behavior data file.
+DATASET CLOSE DNATTBEH.
+
+************************************************************************************************************************************************************************************
+***** Merge in DESSA data.
+************************************************************************************************************************************************************************************
+
+***** Prep DESSA data file for merge.
+DATASET ACTIVATE DESSA.
+***** Delete unnecessary variables.
+DELETE VARIABLES DataDescription ProgramId ProgramName SiteId SiteName GroupId GroupName RatingYear ChildId ChildStatus ExternalId ChildLN
+ChildFN ChildMN ChildGender ChildBirth RaterId RaterName RaterGender RaterType RaterDescription RatingId RatingStatus RatingPeriod RecordForm
+AgeNormsTable AgeAtRatingMonths InRaw InTScore InPercentile InDescription ScRaw ScTScore ScPercentile SCDescription AtRaw AtTScore
+ATPercentile ATDescription TpfRaw TpfTScore TpfPercentile TpfDescription BCRaw BCTScore BCPercentile BCDescription PrRaw PrTScore PrPercentile
+PrDescription OtRaw OtTScore OtPercentile OtDescription GbRaw GbTScore GbPercentile GbDescription SoRaw SoTScore SoPercentile SoDescription
+DmRaw DmTScore DmPercentile DmDescription RsRaw RsTScore RsPercentile RsDescription SaRaw SaTScore SaPercentile SaDescription SmRaw
+SmTScore SmPercentile SmDescription LastUpdate OriginDate Q1 Q2 Q3 Q4 Q5 Q6 Q7 Q8 Q9 Q10 Q11 Q12 Q13 Q14 Q15 Q16 Q17 Q18 Q19 Q20 Q21
+Q22 Q23 Q24 Q25 Q26 Q27 Q28 Q29 Q30 Q31 Q32 Q33 Q34 Q35 Q36 Q37 Q38 Q39 Q40 Q41 Q42 Q43 Q44 Q45 Q46 Q47 Q48 Q49 Q50 Q51 Q52 Q53
+Q54 Q55 Q56 Q57 Q58 Q59 Q60 Q61 Q62 Q63 Q64 Q65 Q66 Q67 Q68 Q69 Q70 Q71 Q72.
+***** Select only rows with an identified CY student ID.
+SELECT IF (cyStudentID ~= "").
+EXECUTE.
+***** Rename variables.
+RENAME VARIABLES (RatingDate = DESSARatingDate) (SecRaw = DESSARaw) (SecTScore = DESSATScore) (SecPercentile = DESSAPercentile)
+(SecDescription = DESSADescription).
+***** Add variable labels for existing variables.
+VARIABLE LABELS DESSARatingDate "Date of DESSA administration"
+   DESSARaw "Raw DESSA Score"
+   DESSATScore "DESSA T Score"
+   DESSAPercentile "DESSA Percentile"
+   DESSADescription "DESSA Category".
+EXECUTE.
+***** Select first and last DESSA administration.
+*****     Set initial value for last data point tag.
+COMPUTE DP2Flag = 2.
+EXECUTE.
+*****     Sort cases, by student ID, descending by assessment date -- this should leave only the most recent assessment tagged in a variable for data point 2.
+SORT CASES BY cyStudentID (A) DESSARatingDate (D).
+DO IF (cyStudentID = LAG(cyStudentID)).
+COMPUTE DP2Flag = 0.
+END IF.
+EXECUTE.
+*****     Set initial value for 1st data point tag.
+COMPUTE DP1Flag = 1.
+EXECUTE.
+*****     Sort cases, by student ID, ascending by assessment date -- this should leave only the oldest assessment tagged in a variable for data point 1.
+SORT CASES BY cyStudentID (A) DESSARatingDate (A).
+DO IF (cyStudentID = LAG(cyStudentID)).
+COMPUTE DP1Flag = 0.
+END IF.
+EXECUTE.
+*****     Smoosh data point tag variables 1 and 2 into a single variable -- any students with only one data point will have that data point tagged as data point 1.
+COMPUTE DPALLFlag = DP2Flag.
+EXECUTE.
+RECODE DP1Flag (1=1) INTO DPALLFlag.
+EXECUTE.
+*Select first and last data points only.
+SELECT IF (DPALLFlag = 1 | DPALLFlag = 2).
+EXECUTE.
+ALTER TYPE DPALLFlag (F1.0).
+***** Restructure dataset so that each row is a unique student with a first and last test administration.
+SORT CASES BY cyStudentID (A) DPALLFlag (A).
+EXECUTE.
+CASESTOVARS
+ /ID=cyStudentID
+ /AUTOFIX = NO
+ /COUNT = DESSADPCount
+ /INDEX = DPALLFlag
+	/DROP = DP1Flag DP2Flag.
+DATASET NAME DESSA.
+***** Calculate number of days between DESSA administrations.
+COMPUTE DESSARatingDateDiff = DATEDIFF(DESSARatingDate.2, DESSARatingDate.1, "days").
+EXECUTE.
+SORT CASES BY cyStudentID (A).
+EXECUTE.
+
+***** Prep final dataset for merge.
+DATASET ACTIVATE FINALDATASET.
+SORT CASES BY cyStudentID (A).
+EXECUTE.
+
+***** Merge student IDs to final dataset.
+MATCH FILES /FILE = FINALDATASET
+   /TABLE = DESSA
+   /BY cyStudentID.
+DATASET NAME FINALDATASET.
+EXECUTE.
+
+***** No longer need the DESSA data file.
+DATASET CLOSE DESSA.
 
 ************************************************************************************************************************************************************************************
 ***** Calculate Met/Not Met Enrollment and Dosage Variables.
@@ -1144,6 +1279,18 @@ VALUE LABELS LITMetQ4Dose 0 "Did not meet Q4 literacy dosage goal"
    1 "Met Q4 literacy dosage goal".
 VALUE LABELS MTHMetQ4Dose 0 "Did not meet Q4 math dosage goal"
    1 "Met Q4 math dosage goal".
+EXECUTE.
+*****     Q4 Dosage Goals - STUDENTS MEETING HALFWAY DOSAGE POINT (primarily for AC purposes).
+IF (LITMet30Enroll = 1 & (TotalDosage.LIT >= (TEAMELAQ4DoseGoalMin * 0.5))) LITMetQ4DoseHalf = 1.
+IF (LITMet30Enroll = 1 & (TotalDosage.LIT < (TEAMELAQ4DoseGoalMin * 0.5))) LITMetQ4DoseHalf = 0.
+IF (MTHMet30Enroll = 1 & (TotalDosage.MTH >= (TEAMMTHQ4DoseGoalMin * 0.5))) MTHMetQ4DoseHalf = 1.
+IF (MTHMet30Enroll = 1 & (TotalDosage.MTH < (TEAMMTHQ4DoseGoalMin * 0.5))) MTHMetQ4DoseHalf = 0.
+VARIABLE LABELS LITMetQ4DoseHalf "Number of Students Meeting HALF ELA/Literacy Q4 Dosage Benchmark (with overlap)"
+   MTHMetQ4DoseHalf "Number of Students Meeting HALF Math Q4 Dosage Benchmark (with overlap)".
+VALUE LABELS LITMetQ4DoseHalf 0 "Did not meet HALF Q4 literacy dosage goal"
+   1 "Met HALF Q4 literacy dosage goal".
+VALUE LABELS MTHMetQ4DoseHalf 0 "Did not meet HALF Q4 math dosage goal"
+   1 "Met HALF Q4 math dosage goal".
 EXECUTE.
 
 ************************************************************************************************************************************************************************************
@@ -1381,6 +1528,23 @@ VALUE LABELS ACMTHMetQ4Dose 0 "AmeriCorps Reporting: Official focus list, did no
    1 "AmeriCorps Reporting: Official focus list, met dosage threshold for math".
 VALUE LABELS ACLITorMTHMetQ4Dose 0 "On official focus list for literacy and/or math, did not meet dosage threshold"
    1 "On official focus list for literacy and/or math, met dosage threshold".
+EXECUTE.
+
+***** Met Enroll/HALF DOSAGE for LIT or MTH.
+IF (ACLITMet30Enroll = 1) ACLITMetQ4DoseHalf = ACLITMet30Enroll * LITMetQ4DoseHalf.
+IF (ACMTHMet30Enroll = 1) ACMTHMetQ4DoseHalf = ACMTHMet30Enroll * MTHMetQ4DoseHalf.
+IF (ACLITMetQ4DoseHalf = 1 | ACMTHMetQ4DoseHalf = 1) ACLITorMTHMetQ4DoseHalf = 1.
+EXECUTE.
+IF (ACLITorMTHMetQ4DoseHalf ~= 1 & (ACLITMetQ4DoseHalf = 0 | ACMTHMetQ4DoseHalf = 0)) ACLITorMTHMetQ4DoseHalf = 0.
+VARIABLE LABELS ACLITMetQ4DoseHalf "Non-unique number of students on official focus lists who met HALF dosage thresholds for literacy (AC reporting)"
+   ACMTHMetQ4DoseHalf "Non-unique number of students on official focus lists who met HALF dosage thresholds for math (AC reporting)"
+   ACLITorMTHMetQ4DoseHalf "Unique number of students on official focus lists who met HALF dosage thresholds for literacy and/or math".
+VALUE LABELS ACLITMetQ4DoseHalf 0 "AmeriCorps Reporting: Official focus list, did not meet HALF dosage threshold for literacy"
+   1 "AmeriCorps Reporting: Official focus list, met HALF dosage threshold for literacy".
+VALUE LABELS ACMTHMetQ4DoseHalf 0 "AmeriCorps Reporting: Official focus list, did not meet HALF dosage threshold for math"
+   1 "AmeriCorps Reporting: Official focus list, met HALF dosage threshold for math".
+VALUE LABELS ACLITorMTHMetQ4DoseHalf 0 "On official focus list for literacy and/or math, did not meet HALF dosage threshold"
+   1 "On official focus list for literacy and/or math, met HALF dosage threshold".
 EXECUTE.
 
 ***** Enrolled in ATT or BEH.
