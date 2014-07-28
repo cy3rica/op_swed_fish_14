@@ -61,7 +61,7 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_MTH_CG 2014.05.30.sav".
 DATASET NAME MTHCGPerf.
 
 ***** Pull up attendance performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14_MY_ATT 2014.05.30.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY ATT 2014.07.25.sav".
 DATASET NAME ATTPerf.
 
 ***** Pull up behavior rubric performance data.
@@ -1001,22 +1001,21 @@ DATASET CLOSE MTHCGPerf.
 ***** Prep attendance performance data file for merge.
 DATASET ACTIVATE ATTPerf.
 ***** Delete unnecessary variables.
-DELETE VARIABLES SITE_NAME SCHOOL_NAME dbo_RPT_STUDENT_MAINGRADE_ID DIPLOMAS_NOW_SCHOOL PRE_SKILL_DESC PRE_SCENARIO
-PRE_ATT_TRACK_EVAL PRE_INVALID_ADA POST_SKILL_DESC POST_FREQ_DESC POST_SCENARIO POST_ATT_ADA POST_ATT_SCHOOL_OPEN
-POST_ATT_MISSING POST_ATT_NOT_ENROLLED POST_ATT_TRACK POST_ATT_TRACK_EVAL POST_INVALID_ADA DOSAGE_CATEGORY TTL_TIME
-ENROLLED_DAYS_CATEGORIES CURRENTLY_ENROLLED ENROLLED_DAYS ATT_PERFORMANCE_CHANGE_LOCAL
-ATT_PERFORMANCE_CHANGE_NATIONAL ATT_ADA_CHANGE ATT_ADA_CHANGE_TYPE Attendance_IA ELA_IA Math_IA Behavior_IA SCHOOL_ID
-dbo_RPT_SCHOOL_GRADEGRADE_ID INDICATOR_ID B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4 B_RULE_VAL5 GRADE_ID_RECODE
-DN_SCHOOL_BY_GRADE MY_MET_56_DAYS MY_IN_IOG_GRADE_RANGE.
+DELETE VARIABLES SITE_NAME SCHOOL_NAME GRADE_ID DIPLOMAS_NOW_SCHOOL SCHOOL_ID PRE_SKILL_DESC PRE_SCENARIO
+PRE_ATT_TRACK_EVAL PRE_INVALID_ADA POST_SKILL_DESC POST_SCENARIO POST_ATT_TRACK_EVAL POST_INVALID_ADA DOSAGE_CATEGORY
+TTL_TIME ENROLLED_DAYS_CATEGORIES CURRENTLY_ENROLLED ENROLLED_DAYS ATT_PERFORMANCE_CHANGE_NATIONAL
+ATT_ADA_CHANGE_TYPE Attendance_IA ELA_IA Math_IA Behavior_IA INDICATOR_ID B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4
+B_RULE_VAL5 GRADE_ID_RECODE EOY_MET_56_DAYS DN_SCHOOL_BY_GRADE EOY_IN_IOG_GRADE_RANGE.
 ***** Rename linking ID variable.
 RENAME VARIABLES (STUDENT_ID = cysdStudentID) (PRE_FREQ_DESC = ATT_PRE_FREQ_DESC) (PRE_ATT_ADA = ATT_PRE_ADA)
 (PRE_ATT_SCHOOL_OPEN = ATT_PRE_SCHOOL_OPEN) (PRE_ATT_MISSING = ATT_PRE_MISSING) (PRE_ATT_NOT_ENROLLED = ATT_PRE_NOT_ENROLLED)
-(PRE_ATT_TRACK = ATT_PRE_TRACK) (MY_FREQ_DESC = ATT_MY_FREQ_DESC) (MY_ADA = ATT_MY_ADA) (MY_TRACK = ATT_MY_TRACK)
-(MY_ADA_CHANGE = ATT_MY_ADA_CHANGE) (MY_ATT_ADA_CHANGE_TYPE = ATT_MY_ADA_CHANGE_TYPE)
-(MY_ATT_INC_BY_2_PERC_PT = ATT_MY_INC_BY_2_PERC_PT) (MY_ATT_PERFORMANCE_CHANGE_LOCAL = ATT_MY_PERF_CHANGE_LOCAL)
-(IOG_LT_90_TO_GTE = ATT_IOG_LT_90_TO_GTE).
+(PRE_ATT_TRACK = ATT_PRE_TRACK) (POST_FREQ_DESC = ATT_POST_FREQ_DESC) (POST_ATT_ADA = ATT_POST_ADA)
+(POST_ATT_SCHOOL_OPEN = ATT_POST_SCHOOL_OPEN) (POST_ATT_MISSING = ATT_POST_MISSING)
+(POST_ATT_NOT_ENROLLED = ATT_POST_NOT_ENROLLED) (POST_ATT_TRACK = ATT_POST_TRACK) (ATT_ADA_CHANGE = ATT_ADA_CHANGE)
+(EOY_ATT_ADA_CHANGE_TYPE = ATT_ADA_CHANGE_TYPE) (EOY_ATT_INC_BY_2_PERC_PT = ATT_INC_BY_2_PERC_PT)
+(ATT_PERFORMANCE_CHANGE_LOCAL = ATT_PERF_CHANGE_LOCAL) (IOG_LT_90_TO_GTE = ATT_IOG_LT_90_TO_GTE).
 ***** Add value labels for existing variables.
-VALUE LABELS ATT_MY_INC_BY_2_PERC_PT 0 "Did not increase ADA by at least 2 percentage points"
+VALUE LABELS ATT_INC_BY_2_PERC_PT 0 "Did not increase ADA by at least 2 percentage points"
    1 "Increased ADA by at least 2 percentage points".
 EXECUTE.
 ***** Add variable labels for existing variables.
@@ -1026,13 +1025,16 @@ ATT_PRE_SCHOOL_OPEN "Attendance: pre number of days school open"
 ATT_PRE_MISSING "Attendance: pre number of days missed"
 ATT_PRE_NOT_ENROLLED "Attendance: pre number of days not enrolled"
 ATT_PRE_TRACK "Attendance: pre performance level"
-ATT_MY_FREQ_DESC "Attendance: post/proxy-post time period"
-ATT_MY_ADA "Attendance: post/proxy-post average daily attendance"
-ATT_MY_TRACK "Attendance: post/proxy-post performance level"
-ATT_MY_ADA_CHANGE "Attendance: post/proxy-post change in average daily attendance"
-ATT_MY_ADA_CHANGE_TYPE "Attendance: post/proxy-post change in average daily attendance (degree)"
-ATT_MY_INC_BY_2_PERC_PT "Attendance: post/proxy-post increase in ADA by at least 2 percentage points?"
-ATT_MY_PERF_CHANGE_LOCAL "Attendance: post/proxy-post change in performance level"
+ATT_POST_FREQ_DESC "Attendance: post time period"
+ATT_POST_ADA "Attendance: post average daily attendance"
+ATT_POST_SCHOOL_OPEN "Attendance: post number of days school open"
+ATT_POST_MISSING "Attendance: post number of days missed"
+ATT_POST_NOT_ENROLLED "Attendance: post number of days not enrolled"
+ATT_POST_TRACK "Attendance: post performance level"
+ATT_ADA_CHANGE "Attendance: pre to post change in average daily attendance"
+ATT_ADA_CHANGE_TYPE "Attendance: pre to post change in average daily attendance (degree)"
+ATT_INC_BY_2_PERC_PT "Attendance: pre to post increase in ADA by at least 2 percentage points?"
+ATT_PERF_CHANGE_LOCAL "Attendance: pre to post change in performance level"
 ATT_IOG_LT_90_TO_GTE "Attendance: did the student start with <90% ADA and move to >=90% ADA?".
 EXECUTE.
 SORT CASES BY cysdStudentID (A).
@@ -1463,12 +1465,12 @@ VARIABLE LABELS MTHCG_anyRawDP "Number of students with at least one math course
 EXECUTE.
 
 ***** Attendance.
-IF (NOT MISSING(ATT_PRE_ADA) | NOT MISSING(ATT_MY_ADA)) ATT_anyRawDP = 1.
-IF (ATT_PRE_TRACK ~= "" & ATT_MY_TRACK ~= "") ATT_2PerfLvlDP = 1.
+IF (NOT MISSING(ATT_PRE_ADA) | NOT MISSING(ATT_POST_ADA)) ATT_anyRawDP = 1.
+IF (ATT_PRE_TRACK ~= "" & ATT_POST_TRACK ~= "") ATT_2PerfLvlDP = 1.
 EXECUTE.
-IF (ATT_PRE_ADA < 0.9 & NOT MISSING(ATT_MY_ADA)) ATT_StartLT90ADA = 1.
+IF (ATT_PRE_ADA < 0.9 & NOT MISSING(ATT_POST_ADA)) ATT_StartLT90ADA = 1.
 EXECUTE.
-IF (ATT_StartLT90ADA = 1 & ATT_MY_ADA >= 0.9) ATT_SOSMoveOn = 1.
+IF (ATT_StartLT90ADA = 1 & ATT_POST_ADA >= 0.9) ATT_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 6-9 Attendance: Of students on official Attendance focus lists meeting the dosage threshold: 35% move from below 90% ADA to at or above 90% ADA.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_anyRawDP = 1) IOG_ATT69_anyRawDP = 1.
@@ -1609,19 +1611,20 @@ TEAMELAQ3EnrollBench TEAMMTHQ3EnrollBench TEAMATTQ3EnrollBench TEAMBEHQ3EnrollBe
 TEAMATTDoseBench TEAMBEHDoseBench grdtemp id SITEELAQ2DoseGoalMin SITEELAQ3DoseGoalMin SITEELAQ4DoseGoalMin SITEMTHQ2DoseGoalMin
 SITEMTHQ3DoseGoalMin SITEMTHQ4DoseGoalMin SITEELAQ2EnrollBench SITEMTHQ2EnrollBench SITEATTQ2EnrollBench SITEBEHQ2EnrollBench
 SITEELAQ3EnrollBench SITEMTHQ3EnrollBench SITEATTQ3EnrollBench SITEBEHQ3EnrollBench ACED2StEngGoal ATT_PRE_SCHOOL_OPEN
-ATT_PRE_MISSING ATT_PRE_NOT_ENROLLED ATT_MY_INC_BY_2_PERC_PT ATT_IOG_LT_90_TO_GTE LITMet30EnrollALL MTHMet30EnrollALL
-ATTMet30EnrollALL BEHMet30EnrollALL LITMet30Enroll MTHMet30Enroll ATTMet30Enroll BEHMet30Enroll ATTMet56Dose BEHMet56Dose LITMetQ2Dose
-MTHMetQ2Dose LITMetQ3Dose MTHMetQ3Dose LITMetQ4Dose MTHMetQ4Dose IOGGradeCount LITAssess_anyRawDP LITAssess_2PerfLvlDP LITAssess_StartOffSlid
-LITAssess_SOSMoveOn IOG_LITAssess35_anyRawDP IOG_LITAssess35_2PerfLvlDP IOG_LITAssess35_StartOffSlid IOG_LITAssess35_SOSMoveOn
-IOG_LITAssess69_anyRawDP IOG_LITAssess69_2PerfLvlDP IOG_LITAssess69_StartOffSlid IOG_LITAssess69_SOSMoveOn ELACG_anyRawDP ELACG_2PerfLvlDP
-ELACG_StartOffSlid ELACG_SOSMoveOn IOG_ELACG69_anyRawDP IOG_ELACG69_2PerfLvlDP IOG_ELACG69_StartOffSlid IOG_ELACG69_SOSMoveOn
-MTHAssess_anyRawDP MTHAssess_2PerfLvlDP MTHAssess_StartOffSlid MTHAssess_SOSMoveOn IOG_MTHAssess35_anyRawDP IOG_MTHAssess35_2PerfLvlDP
-IOG_MTHAssess35_StartOffSlid IOG_MTHAssess35_SOSMoveOn IOG_MTHAssess69_anyRawDP IOG_MTHAssess69_2PerfLvlDP IOG_MTHAssess69_StartOffSlid
-IOG_MTHAssess69_SOSMoveOn MTHCG_anyRawDP MTHCG_2PerfLvlDP MTHCG_StartOffSlid MTHCG_SOSMoveOn IOG_MTHCG69_anyRawDP
-IOG_MTHCG69_2PerfLvlDP IOG_MTHCG69_StartOffSlid IOG_MTHCG69_SOSMoveOn ATT_anyRawDP ATT_2PerfLvlDP ATT_StartLT90ADA ATT_SOSMoveOn
-IOG_ATT69_anyRawDP IOG_ATT69_2PerfLvlDP IOG_ATT69_StartLT90ADA IOG_ATT69_SOSMoveOn ACLITMet30Enroll ACMTHMet30Enroll ACLITorMTHMet30Enroll
-ACLITMetQ4Dose ACMTHMetQ4Dose ACLITorMTHMetQ4Dose ACATTMet30Enroll ACBEHMet30Enroll ACATTorBEHMet30Enroll ACATTMet56Dose ACBEHMet56Dose
-ACATTorBEHMet56Dose ACStudentGrade (F40.0).
+ATT_PRE_MISSING ATT_PRE_NOT_ENROLLED ATT_POST_SCHOOL_OPEN ATT_POST_MISSING ATT_POST_NOT_ENROLLED ATT_INC_BY_2_PERC_PT
+ATT_IOG_LT_90_TO_GTE LITMet30EnrollALL MTHMet30EnrollALL ATTMet30EnrollALL BEHMet30EnrollALL LITMet30Enroll MTHMet30Enroll ATTMet30Enroll
+BEHMet30Enroll ATTMet56Dose BEHMet56Dose LITMetQ2Dose MTHMetQ2Dose LITMetQ3Dose MTHMetQ3Dose LITMetQ4Dose MTHMetQ4Dose IOGGradeCount
+LITAssess_anyRawDP LITAssess_2PerfLvlDP LITAssess_StartOffSlid LITAssess_SOSMoveOn IOG_LITAssess35_anyRawDP IOG_LITAssess35_2PerfLvlDP
+IOG_LITAssess35_StartOffSlid IOG_LITAssess35_SOSMoveOn IOG_LITAssess69_anyRawDP IOG_LITAssess69_2PerfLvlDP IOG_LITAssess69_StartOffSlid
+IOG_LITAssess69_SOSMoveOn ELACG_anyRawDP ELACG_2PerfLvlDP ELACG_StartOffSlid ELACG_SOSMoveOn IOG_ELACG69_anyRawDP
+IOG_ELACG69_2PerfLvlDP IOG_ELACG69_StartOffSlid IOG_ELACG69_SOSMoveOn MTHAssess_anyRawDP MTHAssess_2PerfLvlDP MTHAssess_StartOffSlid
+MTHAssess_SOSMoveOn IOG_MTHAssess35_anyRawDP IOG_MTHAssess35_2PerfLvlDP IOG_MTHAssess35_StartOffSlid IOG_MTHAssess35_SOSMoveOn
+IOG_MTHAssess69_anyRawDP IOG_MTHAssess69_2PerfLvlDP IOG_MTHAssess69_StartOffSlid IOG_MTHAssess69_SOSMoveOn MTHCG_anyRawDP
+MTHCG_2PerfLvlDP MTHCG_StartOffSlid MTHCG_SOSMoveOn IOG_MTHCG69_anyRawDP IOG_MTHCG69_2PerfLvlDP IOG_MTHCG69_StartOffSlid
+IOG_MTHCG69_SOSMoveOn ATT_anyRawDP ATT_2PerfLvlDP ATT_StartLT90ADA ATT_SOSMoveOn IOG_ATT69_anyRawDP IOG_ATT69_2PerfLvlDP
+IOG_ATT69_StartLT90ADA IOG_ATT69_SOSMoveOn ACLITMet30Enroll ACMTHMet30Enroll ACLITorMTHMet30Enroll ACLITMetQ4Dose ACMTHMetQ4Dose
+ACLITorMTHMetQ4Dose ACATTMet30Enroll ACBEHMet30Enroll ACATTorBEHMet30Enroll ACATTMet56Dose ACBEHMet56Dose ACATTorBEHMet56Dose
+ACStudentGrade (F40.0).
 
 ************************************************************************************************************************************************************************************
 ***** Create team-level summary dataset.
