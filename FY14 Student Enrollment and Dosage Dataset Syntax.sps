@@ -69,8 +69,8 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH RUBRIC 2014.07.25.
 DATASET NAME BEHRUBPerf.
 
 ***** Pull up behavior school-based performance data.
-*GET FILE = "".
-*DATASET NAME BEHSCHPerf.
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH SCHOOL BASED 2014.07.25.sav".
+DATASET NAME BEHSCHPerf.
 
 ***** Pull up Diplomas Now Attendance and Behavior dataset.
 GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Diplomas Now Attendance Behavior Data 2014.07.24.sav".
@@ -1109,6 +1109,68 @@ EXECUTE.
 
 ***** No longer need the attendance dataset.
 DATASET CLOSE BEHRUBPerf.
+
+************************************************************************************************************************************************************************************
+***** Merge in school-based behavior data.
+************************************************************************************************************************************************************************************
+
+***** Prep attendance performance data file for merge.
+DATASET ACTIVATE BEHSCHPerf.
+***** Delete unnecessary variables.
+DELETE VARIABLES SITE_NAME SCHOOL_NAME GRADE_ID DIPLOMAS_NOW_SCHOOL SCHOOL_ID PRE_BEH_SUS_DESC PRE_BEH_DET_DESC
+PRE_BEH_OFF_DESC PRE_SCENARIO POST_BEH_SUS_DESC POST_BEH_DET_DESC POST_BEH_OFF_DESC POST_SCENARIO
+ENROLLED_DAYS ENROLLED_DAYS_CATEGORIES TTL_TIME DOSAGE_CATEGORIES Attendance_IA ELA_IA Math_IA Behavior_IA INDICATOR_ID
+B_RULE_VAL1 B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4 B_RULE_VAL5 GRADE_ID_RECODE EOY_MET_56_DAYS DN_SCHOOL_BY_GRADE
+EOY_IN_IOG_GRADE_RANGE.
+***** Rename linking ID variable.
+RENAME VARIABLES (STUDENT_ID = cysdStudentID) (PRE_BEH_VALUE = BEHSCH_PRE_FREQ_DESC) (PRE_BEH_SUS = BEHSCH_PRE_SUS)
+(PRE_BEH_DET = BEHSCH_PRE_DET) (PRE_BEH_OFF = BEHSCH_PRE_OFF) (POST_BEH_VALUE = BEHSCH_POST_FREQ_DESC)
+(POST_BEH_SUS = BEHSCH_POST_SUS) (POST_BEH_DET = BEHSCH_POST_DET) (POST_BEH_OFF = BEHSCH_POST_OFF)
+(PRE_BEH_OFF_CAT = BEHSCH_PRE_OFF_CAT) (PRE_BEH_DET_CAT = BEHSCH_PRE_DET_CAT) (PRE_BEH_SUS_CAT = BEHSCH_PRE_SUS_CAT)
+(POST_BEH_OFF_CAT = BEHSCH_POST_OFF_CAT) (POST_BEH_DET_CAT = BEHSCH_POST_DET_CAT)
+(POST_BEH_SUS_CAT = BEHSCH_POST_SUS_CAT) (EOY_OFF_FromZero = BEHSCH_EOY_OFF_FromZero)
+(EOY_DET_FromZero = BEHSCH_EOY_DET_FromZero) (EOY_SUS_FromZero = BEHSCH_EOY_SUS_FromZero)
+(EOY_OFF_FromGTZero = BEHSCH_EOY_OFF_FromGTZero) (EOY_DET_FromGTZero = BEHSCH_EOY_DET_FromGTZero)
+(EOY_SUS_FromGTZero = BEHSCH_EOY_SUS_FromGTZero).
+***** Add variable labels for existing variables.
+VARIABLE LABELS BEHSCH_PRE_FREQ_DESC "Behavior (School-Based): pre time period"
+BEHSCH_PRE_SUS "Behavior (School-Based): pre number of suspensions"
+BEHSCH_PRE_DET "Behavior (School-Based): pre number of detentions"
+BEHSCH_PRE_OFF "Behavior (School-Based): pre number of office referrals"
+BEHSCH_POST_FREQ_DESC "Behavior (School-Based): post time period"
+BEHSCH_POST_SUS "Behavior (School-Based): post number of suspensions"
+BEHSCH_POST_DET "Behavior (School-Based): post number of detentions"
+BEHSCH_POST_OFF "Behavior (School-Based): post number of office referrals"
+BEHSCH_PRE_OFF_CAT "Behavior (School-Based): pre number of office referrals (categories)"
+BEHSCH_PRE_DET_CAT "Behavior (School-Based): pre number of detentions (categories)"
+BEHSCH_PRE_SUS_CAT "Behavior (School-Based): pre number of suspensions (categories)"
+BEHSCH_POST_OFF_CAT "Behavior (School-Based): post number of office referrals (categories)"
+BEHSCH_POST_DET_CAT "Behavior (School-Based): post number of detentions (categories)"
+BEHSCH_POST_SUS_CAT "Behavior (School-Based): post number of suspensions (categories)"
+BEHSCH_EOY_OFF_FromZero "Behavior (School-Based): change in office referrals (students starting with zero referrals)"
+BEHSCH_EOY_DET_FromZero "Behavior (School-Based): change in detentions (students starting with zero referrals)"
+BEHSCH_EOY_SUS_FromZero "Behavior (School-Based): change in suspensions (students starting with zero suspensions)"
+BEHSCH_EOY_OFF_FromGTZero "Behavior (School-Based): change in office referrals (students starting with > zero referrals)"
+BEHSCH_EOY_DET_FromGTZero "Behavior (School-Based): change in detentions (students starting with > zero detentions)"
+BEHSCH_EOY_SUS_FromGTZero "Behavior (School-Based): change in suspensions (students starting with > zero suspensions)".
+EXECUTE.
+SORT CASES BY cysdStudentID (A).
+EXECUTE.
+
+***** Prep final dataset for merge.
+DATASET ACTIVATE FINALDATASET.
+SORT CASES BY cysdStudentID (A).
+EXECUTE.
+
+***** Merge student IDs to final dataset.
+MATCH FILES /FILE = FINALDATASET
+   /TABLE = BEHSCHPerf
+   /BY cysdStudentID.
+DATASET NAME FINALDATASET.
+EXECUTE.
+
+***** No longer need the attendance dataset.
+DATASET CLOSE BEHSCHPerf.
 
 ************************************************************************************************************************************************************************************
 ***** Merge in Diplomas Now attendance and behavior performance data.
