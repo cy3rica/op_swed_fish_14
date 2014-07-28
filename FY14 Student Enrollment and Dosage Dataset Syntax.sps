@@ -65,8 +65,8 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY ATT 2014.07.25.sav".
 DATASET NAME ATTPerf.
 
 ***** Pull up behavior rubric performance data.
-*GET FILE = "".
-*DATASET NAME BEHRUBPerf.
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH RUBRIC 2014.07.25.sav".
+DATASET NAME BEHRUBPerf.
 
 ***** Pull up behavior school-based performance data.
 *GET FILE = "".
@@ -1054,6 +1054,61 @@ EXECUTE.
 
 ***** No longer need the attendance dataset.
 DATASET CLOSE ATTPerf.
+
+************************************************************************************************************************************************************************************
+***** Merge in behavior rubric data.
+************************************************************************************************************************************************************************************
+
+***** Prep attendance performance data file for merge.
+DATASET ACTIVATE BEHRUBPerf.
+***** Delete unnecessary variables.
+DELETE VARIABLES SITE_NAME SCHOOL_NAME GRADE_ID DIPLOMAS_NOW_SCHOOL SCHOOL_ID CURRENTLY_ENROLLED ENROLLED_DAYS
+ENROLLED_DAYS_CATEGORIES TTL_TIME DOSAGE_CATEGORIES Attendance_IA ELA_IA Math_IA Behavior_IA INDICATOR_ID B_RULE_VAL1
+B_RULE_VAL2 B_RULE_VAL3 B_RULE_VAL4 B_RULE_VAL5 GRADE_ID_RECODE EOY_MET_56_DAYS DN_SCHOOL_BY_GRADE
+EOY_IN_IOG_GRADE_RANGE.
+***** Rename linking ID variable.
+RENAME VARIABLES (STUDENT_ID = cysdStudentID) (PRE_INTERVAL = BEHRUB_PRE_INTERVAL)
+(PRE_SLF_AWR_PERF_VALUE = BEHRUB_PRE_SLF_AWR) (PRE_SLF_MNG_PERF_VALUE = BEHRUB_PRE_SLF_MNG)
+(PRE_SCL_AWR_PERF_VALUE = BEHRUB_PRE_SCL_AWR) (PRE_REL_SKL_PERF_VALUE = BEHRUB_PRE_REL_SKL)
+(PRE_RES_DCN_MAK_PERF_VALUE = BEHRUB_PRE_RES_DCN_MAK) (AVG_PRE_SCORE = BEHRUB_PRE_SCORE_AVG)
+(POST_INTERVAL = BEHRUB_POST_INTERVAL) (POST_SLF_AWR_PERF_VALUE = BEHRUB_POST_SLF_AWR)
+(POST_SLF_MNG_PERF_VALUE = BEHRUB_POST_SLF_MNG) (POST_SCL_AWR_PERF_VALUE = BEHRUB_POST_SCL_AWR)
+(POST_REL_SKL_PERF_VALUE = BEHRUB_POST_REL_SKL) (POST_RES_DCN_MAK_PERF_VALUE = BEHRUB_POST_RES_DCN_MAK)
+(AVG_POST_SCORE = BEHRUB_POST_SCORE_AVG) (AVG_CHANGE_PRE_TO_POST = BEHRUB_CHANGE_AVG).
+***** Add variable labels for existing variables.
+VARIABLE LABELS BEHRUB_PRE_INTERVAL "Behavior Rubric: pre date"
+BEHRUB_PRE_SLF_AWR "Behavior Rubric: pre skill: self awareness"
+BEHRUB_PRE_SLF_MNG "Behavior Rubric: pre skill: self management"
+BEHRUB_PRE_SCL_AWR "Behavior Rubric: pre skill: social awareness"
+BEHRUB_PRE_REL_SKL "Behavior Rubric: pre skill: relationship skills"
+BEHRUB_PRE_RES_DCN_MAK "Behavior Rubric: pre skill: responsible decision making"
+BEHRUB_PRE_SCORE_AVG "Behavior Rubric: pre average score"
+BEHRUB_POST_INTERVAL "Behavior Rubric: post date"
+BEHRUB_POST_SLF_AWR "Behavior Rubric: post skill: self awareness"
+BEHRUB_POST_SLF_MNG "Behavior Rubric: post skill: self management"
+BEHRUB_POST_SCL_AWR "Behavior Rubric: post skill: social awareness"
+BEHRUB_POST_REL_SKL "Behavior Rubric: post skill: relationship skills"
+BEHRUB_POST_RES_DCN_MAK "Behavior Rubric: post skill: responsible decision making"
+BEHRUB_POST_SCORE_AVG "Behavior Rubric: post average score"
+BEHRUB_CHANGE_AVG "Behavior Rubric: pre to post change in average score".
+EXECUTE.
+SORT CASES BY cysdStudentID (A).
+EXECUTE.
+
+***** Prep final dataset for merge.
+DATASET ACTIVATE FINALDATASET.
+SORT CASES BY cysdStudentID (A).
+EXECUTE.
+
+***** Merge student IDs to final dataset.
+MATCH FILES /FILE = FINALDATASET
+   /TABLE = BEHRUBPerf
+   /BY cysdStudentID.
+DATASET NAME FINALDATASET.
+EXECUTE.
+
+***** No longer need the attendance dataset.
+DATASET CLOSE BEHRUBPerf.
 
 ************************************************************************************************************************************************************************************
 ***** Merge in Diplomas Now attendance and behavior performance data.
