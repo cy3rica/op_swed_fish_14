@@ -3,17 +3,25 @@
 ************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************
 ***** Before running:
-*****     - Make sure to load the cyschoolhouse report (Total Student Dosage per IA - Mod, HQ Eval folder) into SPSS and that it is the current active file.
 *****     - Make sure to save FY14 school name to ID translation in FY14 cross instrument source data file folder.
 ************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************
-***** FYI -- LINES 179 TO END OF FILE SHOULD BE IDENTICAL TO FILE FY14 STUDENT ENROLLMENT AND DOSAGE DATASET SYNTAX - TIME MACHINE.
+***** FYI -- LINES 187 TO END OF FILE SHOULD BE IDENTICAL TO FILE FY14 STUDENT ENROLLMENT AND DOSAGE DATASET SYNTAX - TIME MACHINE.
 ************************************************************************************************************************************************************************************
+***** Additional notes:
+*****     Data cleaning.
+*****     Fern Bacon MS (Sacramento) administered different versions of the easyCBM math assessment at start-of-year and end-of-year. The proper.
+*****     benchmarks were applied at each respective time period, therefore raw scores and local and on/sliding/off performance categories accurately.
+*****     represent student performance results. However, this means that we are unable to compare raw scores across time periods, and the raw.
+*****     scores in this dataset will be suppressed for Fern Bacon MS.
+************************************************************************************************************************************************************************************
+
 ************************************************************************************************************************************************************************************
 ***** Pull up and define source data files -- don't forget to make sure all ID variables are identical size/format.
 ************************************************************************************************************************************************************************************
 
 ***** First, give the active dataset (cyschoolhouse report data) a name.
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\Total Student Dosage per IA - Mod 2014.07.01.sav".
 DATASET NAME StudentEnrollDosage.
 
 ***** Pull up school name to ID translation file.
@@ -37,47 +45,47 @@ GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 cyschoolhouse AmeriCorps G
 DATASET NAME ACGrantIDs.
 
 ***** Pull up AmeriCorps grant requirements.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 ACPM Summary for Progress Monitoring_eval 2014.06.19.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 ACPM Summary for Progress Monitoring_eval 2014.08.14.sav".
 DATASET NAME ACGoals.
 
 ***** Pull up Student ID translation file.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\dbo_RPT_STUDENT_MAIN 2014.05.30.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\dbo_RPT_STUDENT_MAIN 2014.08.25.sav".
 DATASET NAME StPerfIDs.
 
 ***** Pull up literacy assessment performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY LIT ASSESS 2014.07.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY LIT ASSESS 2014.10.01.sav".
 DATASET NAME LITAssessPerf.
 
 ***** Pull up math assessment performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY MTH ASSESS 2014.07.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY MTH ASSESS 2014.10.01.sav".
 DATASET NAME MTHAssessPerf.
 
 ***** Pull up ELA course grade performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY ELA CG 2014.07.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY ELA CG 2014.10.01.sav".
 DATASET NAME ELACGPerf.
 
 ***** Pull up math course grade performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY MTH CG 2014.07.28.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY MTH CG 2014.10.01.sav".
 DATASET NAME MTHCGPerf.
 
 ***** Pull up attendance performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY ATT 2014.07.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY ATT 2014.10.01.sav".
 DATASET NAME ATTPerf.
 
 ***** Pull up behavior rubric performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH RUBRIC 2014.07.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH RUBRIC 2014.10.01.sav".
 DATASET NAME BEHRUBPerf.
 
 ***** Pull up behavior school-based performance data.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH SCHOOL BASED 2014.07.25.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 EOY BEH SCHOOL BASED 2014.10.01.sav".
 DATASET NAME BEHSCHPerf.
 
 ***** Pull up Diplomas Now Attendance and Behavior dataset.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Diplomas Now Attendance Behavior Data 2014.07.24.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Diplomas Now Attendance Behavior Data 2014.09.30.sav".
 DATASET NAME DNATTBEH.
 
 ***** Pull up DESSA dataset.
-GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Final DESSA Dataset 6.25.14 - with IDs.sav".
+GET FILE = "Z:\Cross Instrument\FY14\Source Data\FY14 Final DESSA Dataset 6.25.14 - with IDs - UPDATE 2014.09.02.sav".
 DATASET NAME DESSA.
 
 ************************************************************************************************************************************************************************************
@@ -763,11 +771,6 @@ MATCH FILES /FILE = FINALDATASET
 DATASET NAME FINALDATASET.
 EXECUTE.
 
-***** Some records don't have a linked cystudentdata ID. This appears to be because a couple records from FY13 are pulling into cyschoolhouse export.
-***** Select only records with a linked cystudentdata ID (i.e. FY14 records).
-SELECT IF NOT MISSING(cysdStudentID).
-EXECUTE.
-
 ***** No longer need the student ID translation file.
 DATASET CLOSE StPerfIDs.
 
@@ -832,6 +835,20 @@ DATASET CLOSE LITAssessPerf.
 
 ***** Prep math assessment data file for merge.
 DATASET ACTIVATE MTHAssessPerf.
+
+********************************************************************************
+***** Data cleaning step.
+*****     Suppress Fern Bacon MS (Sacramento) raw score math.
+*****     assessment data. Performance categories can remain intact.
+********************************************************************************
+
+IF (SITE_NAME = "Sacramento" & SCHOOL_NAME = "Fern Bacon Middle School") PRE_VALUE_NUM = $SYSMIS.
+IF (SITE_NAME = "Sacramento" & SCHOOL_NAME = "Fern Bacon Middle School") POST_VALUE_NUM = $SYSMIS.
+IF (SITE_NAME = "Sacramento" & SCHOOL_NAME = "Fern Bacon Middle School") LIT_ASSESS_RAWCHANGE_DEGREE = "".
+EXECUTE.
+
+********************************************************************************
+
 ***** Delete unnecessary variables.
 DELETE VARIABLES SITE_NAME SCHOOL_NAME GRADE_ID DIPLOMAS_NOW_SCHOOL SCHOOL_ID ASSESSMENT_TYPE PRE_VALUE
 PRE_TRACK_NATIONAL POST_VALUE POST_TRACK_NATIONAL DOSAGE_CATEGORY TTL_TIME ENROLLED_DAYS_CATEGORIES
@@ -864,6 +881,7 @@ MTHAssess_RAWCHANGE_DEG "Math Assessments: pre to post change in raw score (degr
 MTHAssess_PERFCHANGE_LOCAL "Math Assessments: pre to post change in performance level (local)"
 MTHAssess_PERFCHANGE_NORM "Math Assessments: pre to post change in performance level (normalized)".
 EXECUTE.
+
 SORT CASES BY cysdStudentID (A).
 EXECUTE.
 
@@ -1182,14 +1200,17 @@ DELETE VARIABLES Location School LocalStudentID StudentGrade ATTFLMetDosage BEHF
 ***** Rename variables.
 RENAME VARIABLES (Q1AverageDailyAttendance = DNATTQ1ADA) (Q4AverageDailyAttendance = DNATTQ4ADA)
 (@1213AverageDailyAttendance = DNATTPrYrADA) (@1314AverageDailyAttendance = DNATTCumulADA)
-(Q1SuspensionsNum = DNBEHQ1SUS) (Q4SuspensionsNum = DNBEHQ4SUS).
+(Q1SuspensionsNum = DNBEHQ1SUS) (Q4SuspensionsNum = DNBEHQ4SUS) (@1213SuspensionsNum = DNBEHPrYrSUS)
+(@1314SuspensionsNum = DNBEHCumulSUS).
 ***** Add variable labels for existing variables.
 VARIABLE LABELS DNATTQ1ADA "Diplomas Now: Attendance: Q1 Average Daily Attendance"
    DNATTQ4ADA "Diplomas Now: Attendance: Q4 Average Daily Attendance"
    DNATTPrYrADA "Diplomas Now: Attendance: Prior Year Average Daily Attendance"
    DNATTCumulADA "Diplomas Now: Attendance: Current Year Cumulative ADA"
    DNBEHQ1SUS "Diplomas Now: Behavior: Q1 Suspensions"
-   DNBEHQ4SUS "Diplomas Now: Behavior: Q4 Suspensions".
+   DNBEHQ4SUS "Diplomas Now: Behavior: Q4 Suspensions"
+   DNBEHPrYrSUS "Diplomas Now: Behavior: Prior Year Suspensions"
+   DNBEHCumulSUS "Diplomas Now: Behavior: Current Year Cumulative Suspensions".
 EXECUTE.
 SORT CASES BY cyStudentID (A).
 EXECUTE.
@@ -1454,85 +1475,125 @@ EXECUTE.
 
 ***** Literacy Assessments.
 IF (NOT MISSING(LITAssess_PRE_VALUE_NUM) | NOT MISSING(LITAssess_POST_VALUE_NUM)) LITAssess_anyRawDP = 1.
+IF (NOT MISSING(LITAssess_PRE_VALUE_NUM) & NOT MISSING(LITAssess_POST_VALUE_NUM)) LITAssess_2RawDP = 1.
 IF (LITAssess_PRE_TRACK_EVAL ~= "" & LITAssess_POST_TRACK_EVAL ~= "") LITAssess_2PerfLvlDP = 1.
 EXECUTE.
+IF (LITAssess_2RawDP = 1 & LITAssess_RAWCHANGE_DEG = "Increase") LITAssess_RawInc = 1.
 IF (LITAssess_2PerfLvlDP = 1 & (LITAssess_PRE_TRACK_EVAL = "SLIDING" | LITAssess_PRE_TRACK_EVAL = "OFF TRACK")) LITAssess_StartOffSlid = 1.
 EXECUTE.
 IF (LITAssess_StartOffSlid = 1 & LITAssess_POST_TRACK_EVAL = "ON TRACK") LITAssess_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 3-5 Literacy: X% or more of students move from below benchmark on literacy skills assessment to at/above benchmark.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_anyRawDP = 1) IOG_LITAssess35_anyRawDP = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_2RawDP = 1) RSO_LITAssess35_2RawDP = 1.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_2PerfLvlDP = 1) IOG_LITAssess35_2PerfLvlDP = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_RawInc = 1) RSO_LITAssess35_RawInc = 1.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_StartOffSlid = 1) IOG_LITAssess35_StartOffSlid = 1.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_SOSMoveOn = 1) IOG_LITAssess35_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 6-9 ELA/Literacy: X% or more of students move from below benchmark on literacy skills assessment to at/above benchmark.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_anyRawDP = 1) IOG_LITAssess69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_2RawDP = 1) RSO_LITAssess69_2RawDP = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_2PerfLvlDP = 1) IOG_LITAssess69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_RawInc = 1) RSO_LITAssess69_RawInc = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_StartOffSlid = 1) IOG_LITAssess69_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & LITAssess_SOSMoveOn = 1) IOG_LITAssess69_SOSMoveOn = 1.
+EXECUTE.
+***** Diplomas Now Grades 6-9 ELA/Literacy.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & LITMetQ4Dose = 1 & LITAssess_anyRawDP = 1) DN_LITAssess69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & LITMetQ4Dose = 1 & LITAssess_2RawDP = 1) DN_LITAssess69_2RawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & LITMetQ4Dose = 1 & LITAssess_2PerfLvlDP = 1) DN_LITAssess69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & LITMetQ4Dose = 1 & LITAssess_RawInc = 1) DN_LITAssess69_RawInc = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & LITMetQ4Dose = 1 & LITAssess_StartOffSlid = 1) DN_LITAssess69_StartOffSlid = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & LITMetQ4Dose = 1 & LITAssess_SOSMoveOn = 1) DN_LITAssess69_SOSMoveOn = 1.
 EXECUTE.
 ***** BOCY: WSWC-only, official focus list, met dosage, started off-track or sliding.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & (LITAssess_PRE_TRACK_EVAL = "SLIDING" | LITAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_LITAssess35_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & (LITAssess_PRE_TRACK_EVAL = "SLIDING" | LITAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_LITAssess69_StartOffSlid = 1.
 EXECUTE.
 VARIABLE LABELS LITAssess_anyRawDP "Number of students with at least one raw literacy assessment performance data point"
+   LITAssess_2RawDP "Number of students with at least two literacy assessment raw score data points"
    LITAssess_2PerfLvlDP "Number of students with at least two literacy assessment performance level data points"
+   LITAssess_RawInc "Number of students who improved in literacy assessment raw scores"
    LITAssess_StartOffSlid "Number of students who started off-track or sliding in literacy assessments"
    LITAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in literacy assessments"
    IOG_LITAssess35_anyRawDP "IOG: 3rd-5th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   RSO_LITAssess35_2RawDP "3rd-5th Grade Literacy Assessments: Number of students who had at least two raw score data points"
    IOG_LITAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   RSO_LITAssess35_RawInc "3rd-5th Grade Literacy Assessments: Number of students who improved raw scores"
    IOG_LITAssess35_StartOffSlid "IOG: 3rd-5th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess35_SOSMoveOn "IOG: 3rd-5th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
    IOG_LITAssess69_anyRawDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   RSO_LITAssess69_2RawDP "6th-9th Grade Literacy Assessments: Number of students who had at least two raw score data points"
    IOG_LITAssess69_2PerfLvlDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   RSO_LITAssess69_RawInc "6th-9th Grade Literacy Assessments: Number of students who improved raw scores"
    IOG_LITAssess69_StartOffSlid "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
+   DN_LITAssess69_anyRawDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   DN_LITAssess69_2RawDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least two raw scores data points"
+   DN_LITAssess69_2PerfLvlDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   DN_LITAssess69_RawInc "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who improved raw scores"
+   DN_LITAssess69_StartOffSlid "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
+   DN_LITAssess69_SOSMoveOn "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
    BOCY_LITAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    BOCY_LITAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding".
 EXECUTE.
 
 ***** ELA Course Grades.
 IF (ELACG_PRE_LETTER_VIEW ~= "" | ELACG_POST_LETTER_VIEW ~= "") ELACG_anyRawDP = 1.
+IF (ELACG_LTRGRD_CHANGE_GENERAL ~= "") ELACG_2RawDP = 1.
 IF (ELACG_PRE_TRACK ~= "" & ELACG_POST_TRACK ~= "") ELACG_2PerfLvlDP = 1.
 EXECUTE.
+IF (ELACG_2RawDP = 1 & ELACG_LTRGRD_CHANGE_GENERAL = "Improve at least one letter grade") ELACG_RawInc = 1.
 IF (ELACG_2PerfLvlDP = 1 & (ELACG_PRE_TRACK = "SLIDING" | ELACG_PRE_TRACK = "OFF TRACK")) ELACG_StartOffSlid = 1.
 EXECUTE.
 IF (ELACG_StartOffSlid = 1 & ELACG_POST_TRACK = "ON TRACK") ELACG_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 6-9 ELA/Literacy: 50% or more of students move from an ELA course grade of “D” or lower to a “C” or higher.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & ELACG_anyRawDP = 1) IOG_ELACG69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & ELACG_2RawDP = 1) RSO_ELACG69_2RawDP = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & ELACG_2PerfLvlDP = 1) IOG_ELACG69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & ELACG_RawInc = 1) RSO_ELACG69_RawInc = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & ELACG_StartOffSlid = 1) IOG_ELACG69_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & LITMetQ4Dose = 1 & ELACG_SOSMoveOn = 1) IOG_ELACG69_SOSMoveOn = 1.
 EXECUTE.
 VARIABLE LABELS ELACG_anyRawDP "Number of students with at least one ELA course grade performance data point"
+   ELACG_2RawDP "Number of students with at least two ELA course grade data points"
    ELACG_2PerfLvlDP "Number of students with at least two ELA course grade performance level data points"
+   ELACG_RawInc "Number of students who improved at least one letter grade in ELA"
    ELACG_StartOffSlid "Number of students who started off-track or sliding in ELA course grades"
    ELACG_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in ELA course grades"
    IOG_ELACG69_anyRawDP "IOG: 6th-9th Grade ELA Course Grades: Number of students who had at least one course grade performance data point"
+   RSO_ELACG69_2RawDP "6th-9th Grade ELA Course Grades: Number of students who had at least two course grade data points"
    IOG_ELACG69_2PerfLvlDP "IOG: 6th-9th Grade ELA Course Grades: Number of students who had at least two performance level data points"
+   RSO_ELACG69_RawInc "6th-9th Grade ELA Course Grades: Number of students who improved at least one letter grade"
    IOG_ELACG69_StartOffSlid "IOG: 6th-9th Grade ELA Course Grades: Number of students who started off-track or sliding"
    IOG_ELACG69_SOSMoveOn "IOG: 6th-9th Grade ELA Course Grades: Number of students who started off-track or sliding and moved back on-track".
 EXECUTE.
 
 ***** Math Assessments.
 IF (NOT MISSING(MTHAssess_PRE_VALUE_NUM) | NOT MISSING(MTHAssess_POST_VALUE_NUM)) MTHAssess_anyRawDP = 1.
+IF (NOT MISSING(MTHAssess_PRE_VALUE_NUM) & NOT MISSING(MTHAssess_POST_VALUE_NUM)) MTHAssess_2RawDP = 1.
 IF (MTHAssess_PRE_TRACK_EVAL ~= "" & MTHAssess_POST_TRACK_EVAL ~= "") MTHAssess_2PerfLvlDP = 1.
 EXECUTE.
+IF (MTHAssess_2RawDP = 1 & MTHAssess_RAWCHANGE_DEG = "Increase") MTHAssess_RawInc = 1.
 IF (MTHAssess_2PerfLvlDP = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) MTHAssess_StartOffSlid = 1.
 EXECUTE.
 IF (MTHAssess_StartOffSlid = 1 & MTHAssess_POST_TRACK_EVAL = "ON TRACK") MTHAssess_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 3-5 Math: 25% or more of students move from below benchmark on math skills assessment to at/above benchmark.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_anyRawDP = 1) IOG_MTHAssess35_anyRawDP = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_2RawDP = 1) RSO_MTHAssess35_2RawDP = 1.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_2PerfLvlDP = 1) IOG_MTHAssess35_2PerfLvlDP = 1.
+IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_RawInc = 1) RSO_MTHAssess35_RawInc = 1.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_StartOffSlid = 1) IOG_MTHAssess35_StartOffSlid = 1.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_SOSMoveOn = 1) IOG_MTHAssess35_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 6-9 Math: 20% or more of students on official focus lists meeting the dosage threshold move from below benchmark on math skills assessment to at/above benchmark.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_anyRawDP = 1) IOG_MTHAssess69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_2RawDP = 1) RSO_MTHAssess69_2RawDP = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_2PerfLvlDP = 1) IOG_MTHAssess69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_RawInc = 1) RSO_MTHAssess69_RawInc = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_StartOffSlid = 1) IOG_MTHAssess69_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHAssess_SOSMoveOn = 1) IOG_MTHAssess69_SOSMoveOn = 1.
 EXECUTE.
@@ -1540,57 +1601,90 @@ EXECUTE.
 IF (StudentGrade <= 5 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_MTHAssess35_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & (MTHAssess_PRE_TRACK_EVAL = "SLIDING" | MTHAssess_PRE_TRACK_EVAL = "OFF TRACK")) BOCY_MTHAssess69_StartOffSlid = 1.
 EXECUTE.
+***** Diplomas Now Grades 6-9 ELA/Literacy.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & MTHMetQ4Dose = 1 & MTHAssess_anyRawDP = 1) DN_MTHAssess69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & MTHMetQ4Dose = 1 & MTHAssess_2RawDP = 1) DN_MTHAssess69_2RawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & MTHMetQ4Dose = 1 & MTHAssess_2PerfLvlDP = 1) DN_MTHAssess69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & MTHMetQ4Dose = 1 & MTHAssess_RawInc = 1) DN_MTHAssess69_RawInc = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & MTHMetQ4Dose = 1 & MTHAssess_StartOffSlid = 1) DN_MTHAssess69_StartOffSlid = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 1 & MTHMetQ4Dose = 1 & MTHAssess_SOSMoveOn = 1) DN_MTHAssess69_SOSMoveOn = 1.
+EXECUTE.
 VARIABLE LABELS MTHAssess_anyRawDP "Number of students with at least one raw math assessment performance data point"
+   MTHAssess_2RawDP "Number of students with at least two math assessment raw score data points"
    MTHAssess_2PerfLvlDP "Number of students with at least two math assessment performance level data points"
+   MTHAssess_RawInc "Number of students who improved in math assessment raw scores"
    MTHAssess_StartOffSlid "Number of students who started off-track or sliding in math assessments"
    MTHAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math assessments"
    IOG_MTHAssess35_anyRawDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   RSO_MTHAssess35_2RawDP "3rd-5th Grade Math Assessments: Number of students who had at least two raw score data points"
    IOG_MTHAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least two performance level data points"
+   RSO_MTHAssess35_RawInc "3rd-5th Grade Math Assessments: Number of students who improved raw scores"
    IOG_MTHAssess35_StartOffSlid "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess35_SOSMoveOn "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
    IOG_MTHAssess69_anyRawDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   RSO_MTHAssess69_2RawDP "6th-9th Grade Math Assessments: Number of students who had at least two raw score data points"
    IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   RSO_MTHAssess69_RawInc "6th-9th Grade Math Assessments: Number of students who improved raw scores"
    IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   DN_MTHAssess69_anyRawDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   DN_MTHAssess69_2RawDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least two raw scores data points"
+   DN_MTHAssess69_2PerfLvlDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   DN_MTHAssess69_RawInc "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who improved raw scores"
+   DN_MTHAssess69_StartOffSlid "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
+   DN_MTHAssess69_SOSMoveOn "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
    BOCY_MTHAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    BOCY_MTHAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding".
 EXECUTE.
 
 ***** Math Course Grades.
 IF (MTHCG_PRE_LETTER_VIEW ~= "" | MTHCG_POST_LETTER_VIEW ~= "") MTHCG_anyRawDP = 1.
+IF (MTHCG_LTRGRD_CHANGE_GENERAL ~= "") MTHCG_2RawDP = 1.
 IF (MTHCG_PRE_TRACK ~= "" & MTHCG_POST_TRACK ~= "") MTHCG_2PerfLvlDP = 1.
 EXECUTE.
+IF (MTHCG_2RawDP = 1 & MTHCG_LTRGRD_CHANGE_GENERAL = "Improve at least one letter grade") MTHCG_RawInc = 1.
 IF (MTHCG_2PerfLvlDP = 1 & (MTHCG_PRE_TRACK = "SLIDING" | MTHCG_PRE_TRACK = "OFF TRACK")) MTHCG_StartOffSlid = 1.
 EXECUTE.
 IF (MTHCG_StartOffSlid = 1 & MTHCG_POST_TRACK = "ON TRACK") MTHCG_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 6-9 Math: 50% or more of students on official focus lists meeting the dosage threshold move from a math course grade of “D” or lower to a “C” or higher.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHCG_anyRawDP = 1) IOG_MTHCG69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHCG_2RawDP = 1) RSO_MTHCG69_2RawDP = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHCG_2PerfLvlDP = 1) IOG_MTHCG69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHCG_RawInc = 1) RSO_MTHCG69_RawInc = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHCG_StartOffSlid = 1) IOG_MTHCG69_StartOffSlid = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & MTHMetQ4Dose = 1 & MTHCG_SOSMoveOn = 1) IOG_MTHCG69_SOSMoveOn = 1.
 EXECUTE.
 VARIABLE LABELS MTHCG_anyRawDP "Number of students with at least one math course grade performance data point"
+   MTHCG_2RawDP "Number of students with at least two math course grade data points"
    MTHCG_2PerfLvlDP "Number of students with at least two math course grade performance level data points"
+   MTHCG_RawInc "Number of students who improved at least one letter grade in math"
    MTHCG_StartOffSlid "Number of students who started off-track or sliding in math course grades"
    MTHCG_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math course grades"
    IOG_MTHCG69_anyRawDP "IOG: 6th-9th Grade Math Course Grades: Number of students who had at least one course grade performance data point"
+   RSO_MTHCG69_2RawDP "6th-9th Grade Math Course Grades: Number of students who had at least two course grade data points"
    IOG_MTHCG69_2PerfLvlDP "IOG: 6th-9th Grade Math Course Grades: Number of students who had at least two performance level data points"
+   RSO_MTHCG69_RawInc "6th-9th Grade Math Course Grades: Number of students who improved at least one letter grade"
    IOG_MTHCG69_StartOffSlid "IOG: 6th-9th Grade Math Course Grades: Number of students who started off-track or sliding"
    IOG_MTHCG69_SOSMoveOn "IOG: 6th-9th Grade Math Course Grades: Number of students who started off-track or sliding and moved back on-track".
 EXECUTE.
 
 ***** Attendance.
 IF (NOT MISSING(ATT_PRE_ADA) | NOT MISSING(ATT_POST_ADA)) ATT_anyRawDP = 1.
+IF (NOT MISSING(ATT_PRE_ADA) & NOT MISSING(ATT_POST_ADA)) ATT_2RawDP = 1.
 IF (ATT_PRE_TRACK ~= "" & ATT_POST_TRACK ~= "") ATT_2PerfLvlDP = 1.
 EXECUTE.
+IF (ATT_PRE_ADA <= 0.99 & NOT MISSING(ATT_POST_ADA)) ATT_StartLTE99ADA = 1.
 IF (ATT_PRE_ADA < 0.9 & NOT MISSING(ATT_POST_ADA)) ATT_StartLT90ADA = 1.
 EXECUTE.
 IF (ATT_StartLT90ADA = 1 & ATT_POST_ADA >= 0.9) ATT_SOSMoveOn = 1.
 EXECUTE.
 ***** Grades 6-9 Attendance: Of students on official Attendance focus lists meeting the dosage threshold: 35% move from below 90% ADA to at or above 90% ADA.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_anyRawDP = 1) IOG_ATT69_anyRawDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_2RawDP = 1) RSO_ATT69_2RawDP = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_2PerfLvlDP = 1) IOG_ATT69_2PerfLvlDP = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_StartLTE99ADA = 1) RSO_ATT69_StartLTE99ADA = 1.
+IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_StartLTE99ADA = 1 & ATT_ADA_CHANGE >= 0.01) RSO_ATT69_1PercInc = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_StartLT90ADA = 1) IOG_ATT69_StartLT90ADA = 1.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_SOSMoveOn = 1) IOG_ATT69_SOSMoveOn = 1.
 EXECUTE.
@@ -1598,14 +1692,43 @@ EXECUTE.
 IF (StudentGrade >= 6 & IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & ATTMet56Dose = 1 & ATT_PRE_ADA < 0.9) BOCY_ATT69_StartLT90ADA = 1.
 EXECUTE.
 VARIABLE LABELS ATT_anyRawDP "Number of students with at least one attendance (ADA) performance data point"
+   ATT_2RawDP "Number of students with at least two attendance (ADA) performance data points"
    ATT_2PerfLvlDP "Number of students with at least two attendance (ADA) performance level data points"
+   ATT_StartLTE99ADA "Number of students who started with less than or equal to 99% average daily attendance"
    ATT_StartLT90ADA "Number of students who started with less than 90% average daily attendance"
    ATT_SOSMoveOn "Number of students who started below 90% ADA and moved to at or above 90% ADA"
    IOG_ATT69_anyRawDP "IOG: 6th-9th Grade Attendance: Number of students who had at least one ADA performance data point"
+   RSO_ATT69_2RawDP "6th-9th Grade Attendance: Number of students who had at least two performance data points"
    IOG_ATT69_2PerfLvlDP "IOG: 6th-9th Grade Attendance: Number of students who had at least two performance level data points"
+   RSO_ATT69_StartLTE99ADA "6th-9th Grade Attendance: Number of students who started with less than or equal to 99% average daily attendance"
+   RSO_ATT69_1PercInc "6th-9th Grade Attendance: Number of students who improved ADA by at least 1 percentage point"
    IOG_ATT69_StartLT90ADA "IOG: 6th-9th Grade Attendance: Number of students who started with less than 90% average daily attendance"
    IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA"
    BOCY_ATT69_StartLT90ADA "Best of City Year: 6th-9th Grade Attendance: Number of students on official focus lists, enrolled 56+ days, and started with less than 90% average daily attendance".
+EXECUTE.
+
+***** Behavior.
+IF (NOT MISSING(BEHSCH_PRE_SUS) | NOT MISSING(BEHSCH_POST_SUS)) BEHSCH_anyRawDP = 1.
+IF (NOT MISSING(BEHSCH_PRE_SUS) & NOT MISSING(BEHSCH_POST_SUS)) BEHSCH_2RawDP = 1.
+EXECUTE.
+IF (BEHSCH_PRE_SUS >= 2 & NOT MISSING(BEHSCH_POST_SUS)) BEHSCH_StartGTE2SUS = 1.
+EXECUTE.
+IF (BEHSCH_StartGTE2SUS = 1 & BEHSCH_POST_SUS <= 1) BEHSCH_SOSMoveOn = 1.
+EXECUTE.
+***** Grades 3-9 Behavior.
+IF (IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & BEHMet56Dose = 1 & BEHSCH_anyRawDP = 1) RSO_BEH39_anyRawDP = 1.
+IF (IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & BEHMet56Dose = 1 & BEHSCH_2RawDP = 1) RSO_BEH39_2RawDP = 1.
+IF (IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & BEHMet56Dose = 1 & BEHSCH_StartGTE2SUS = 1) RSO_BEH39_StartGTE2SUS = 1.
+IF (IOGGradeCount = 1 & DN_SCHOOL_BY_GRADE = 0 & BEHMet56Dose = 1 & BEHSCH_SOSMoveOn = 1) RSO_BEH39_SOSMoveOn = 1.
+EXECUTE.
+VARIABLE LABELS BEHSCH_anyRawDP "Number of students with at least one suspension data point"
+   BEHSCH_2RawDP "Number of students with at least two suspension data points"
+   BEHSCH_StartGTE2SUS "Number of students who started with at least two suspensions"
+   BEHSCH_SOSMoveOn "Number of students who started with at least two suspensions and ended with less than 2 suspensions"
+   RSO_BEH39_anyRawDP "3rd-9th Grade Behavior: Number of students with at least one suspension data point"
+   RSO_BEH39_2RawDP "3rd-9th Grade Behavior: Number of students with at least two suspension data points"
+   RSO_BEH39_StartGTE2SUS "3rd-9th Grade Behavior: Number of students who started with at least two suspensions"
+   RSO_BEH39_SOSMoveOn "3rd-9th Grade Behavior: Number of students who started with at least two suspensions and ended with less than 2 suspensions".
 EXECUTE.
 
 ************************************************************************************************************************************************************************************
@@ -1816,58 +1939,103 @@ AGGREGATE /OUTFILE = FINALTEAMDATASET
    /IOG_BEH35_OfficialFL = SUM(IOG_BEH35_OfficialFL)
    /IOG_BEH69_OfficialFL = SUM(IOG_BEH69_OfficialFL)
    /LITAssess_anyRawDP = SUM(LITAssess_anyRawDP)
+   /LITAssess_2RawDP = SUM(LITAssess_2RawDP)
    /LITAssess_2PerfLvlDP = SUM(LITAssess_2PerfLvlDP)
+   /LITAssess_RawInc = SUM(LITAssess_RawInc)
    /LITAssess_StartOffSlid = SUM(LITAssess_StartOffSlid)
    /LITAssess_SOSMoveOn = SUM(LITAssess_SOSMoveOn)
    /IOG_LITAssess35_anyRawDP = SUM(IOG_LITAssess35_anyRawDP)
+   /RSO_LITAssess35_2RawDP = SUM(RSO_LITAssess35_2RawDP)
    /IOG_LITAssess35_2PerfLvlDP = SUM(IOG_LITAssess35_2PerfLvlDP)
+   /RSO_LITAssess35_RawInc = SUM(RSO_LITAssess35_RawInc)
    /IOG_LITAssess35_StartOffSlid = SUM(IOG_LITAssess35_StartOffSlid)
    /IOG_LITAssess35_SOSMoveOn = SUM(IOG_LITAssess35_SOSMoveOn)
    /IOG_LITAssess69_anyRawDP = SUM(IOG_LITAssess69_anyRawDP)
+   /RSO_LITAssess69_2RawDP = SUM(RSO_LITAssess69_2RawDP)
    /IOG_LITAssess69_2PerfLvlDP = SUM(IOG_LITAssess69_2PerfLvlDP)
+   /RSO_LITAssess69_RawInc = SUM(RSO_LITAssess69_RawInc)
    /IOG_LITAssess69_StartOffSlid = SUM(IOG_LITAssess69_StartOffSlid)
    /IOG_LITAssess69_SOSMoveOn = SUM(IOG_LITAssess69_SOSMoveOn)
+   /DN_LITAssess69_anyRawDP = SUM(DN_LITAssess69_anyRawDP)
+   /DN_LITAssess69_2RawDP = SUM(DN_LITAssess69_2RawDP)
+   /DN_LITAssess69_2PerfLvlDP = SUM(DN_LITAssess69_2PerfLvlDP)
+   /DN_LITAssess69_RawInc = SUM(DN_LITAssess69_RawInc)
+   /DN_LITAssess69_StartOffSlid = SUM(DN_LITAssess69_StartOffSlid)
+   /DN_LITAssess69_SOSMoveOn = SUM(DN_LITAssess69_SOSMoveOn)
    /BOCY_LITAssess35_StartOffSlid = SUM(BOCY_LITAssess35_StartOffSlid)
    /BOCY_LITAssess69_StartOffSlid = SUM(BOCY_LITAssess69_StartOffSlid)
    /ELACG_anyRawDP = SUM(ELACG_anyRawDP)
+   /ELACG_2RawDP = SUM(ELACG_2RawDP)
    /ELACG_2PerfLvlDP = SUM(ELACG_2PerfLvlDP)
+   /ELACG_RawInc = SUM(ELACG_RawInc)
    /ELACG_StartOffSlid = SUM(ELACG_StartOffSlid)
    /ELACG_SOSMoveOn = SUM(ELACG_SOSMoveOn)
    /IOG_ELACG69_anyRawDP = SUM(IOG_ELACG69_anyRawDP)
+   /RSO_ELACG69_2RawDP = SUM(RSO_ELACG69_2RawDP)
    /IOG_ELACG69_2PerfLvlDP = SUM(IOG_ELACG69_2PerfLvlDP)
+   /RSO_ELACG69_RawInc = SUM(RSO_ELACG69_RawInc)
    /IOG_ELACG69_StartOffSlid = SUM(IOG_ELACG69_StartOffSlid)
    /IOG_ELACG69_SOSMoveOn = SUM(IOG_ELACG69_SOSMoveOn)
    /MTHAssess_anyRawDP = SUM(MTHAssess_anyRawDP)
+   /MTHAssess_2RawDP = SUM(MTHAssess_2RawDP)
    /MTHAssess_2PerfLvlDP = SUM(MTHAssess_2PerfLvlDP)
+   /MTHAssess_RawInc = SUM(MTHAssess_RawInc)
    /MTHAssess_StartOffSlid = SUM(MTHAssess_StartOffSlid)
    /MTHAssess_SOSMoveOn = SUM(MTHAssess_SOSMoveOn)
    /IOG_MTHAssess35_anyRawDP = SUM(IOG_MTHAssess35_anyRawDP)
+   /RSO_MTHAssess35_2RawDP = SUM(RSO_MTHAssess35_2RawDP)
    /IOG_MTHAssess35_2PerfLvlDP = SUM(IOG_MTHAssess35_2PerfLvlDP)
+   /RSO_MTHAssess35_RawInc = SUM(RSO_MTHAssess35_RawInc)
    /IOG_MTHAssess35_StartOffSlid = SUM(IOG_MTHAssess35_StartOffSlid)
    /IOG_MTHAssess35_SOSMoveOn = SUM(IOG_MTHAssess35_SOSMoveOn)
    /IOG_MTHAssess69_anyRawDP = SUM(IOG_MTHAssess69_anyRawDP)
+   /RSO_MTHAssess69_2RawDP = SUM(RSO_MTHAssess69_2RawDP)
    /IOG_MTHAssess69_2PerfLvlDP = SUM(IOG_MTHAssess69_2PerfLvlDP)
+   /RSO_MTHAssess69_RawInc = SUM(RSO_MTHAssess69_RawInc)
    /IOG_MTHAssess69_StartOffSlid = SUM(IOG_MTHAssess69_StartOffSlid)
    /IOG_MTHAssess69_SOSMoveOn = SUM(IOG_MTHAssess69_SOSMoveOn)
+   /DN_MTHAssess69_anyRawDP = SUM(DN_MTHAssess69_anyRawDP)
+   /DN_MTHAssess69_2RawDP = SUM(DN_MTHAssess69_2RawDP)
+   /DN_MTHAssess69_2PerfLvlDP = SUM(DN_MTHAssess69_2PerfLvlDP)
+   /DN_MTHAssess69_RawInc = SUM(DN_MTHAssess69_RawInc)
+   /DN_MTHAssess69_StartOffSlid = SUM(DN_MTHAssess69_StartOffSlid)
+   /DN_MTHAssess69_SOSMoveOn = SUM(DN_MTHAssess69_SOSMoveOn)
    /BOCY_MTHAssess35_StartOffSlid = SUM(BOCY_MTHAssess35_StartOffSlid)
    /BOCY_MTHAssess69_StartOffSlid = SUM(BOCY_MTHAssess69_StartOffSlid)
    /MTHCG_anyRawDP = SUM(MTHCG_anyRawDP)
+   /MTHCG_2RawDP = SUM(MTHCG_2RawDP)
    /MTHCG_2PerfLvlDP = SUM(MTHCG_2PerfLvlDP)
+   /MTHCG_RawInc = SUM(MTHCG_RawInc)
    /MTHCG_StartOffSlid = SUM(MTHCG_StartOffSlid)
    /MTHCG_SOSMoveOn = SUM(MTHCG_SOSMoveOn)
    /IOG_MTHCG69_anyRawDP = SUM(IOG_MTHCG69_anyRawDP)
+   /RSO_MTHCG69_2RawDP = SUM(RSO_MTHCG69_2RawDP)
    /IOG_MTHCG69_2PerfLvlDP = SUM(IOG_MTHCG69_2PerfLvlDP)
+   /RSO_MTHCG69_RawInc = SUM(RSO_MTHCG69_RawInc)
    /IOG_MTHCG69_StartOffSlid = SUM(IOG_MTHCG69_StartOffSlid)
    /IOG_MTHCG69_SOSMoveOn = SUM(IOG_MTHCG69_SOSMoveOn)
    /ATT_anyRawDP = SUM(ATT_anyRawDP)
+   /ATT_2RawDP = SUM(ATT_2RawDP)
    /ATT_2PerfLvlDP = SUM(ATT_2PerfLvlDP)
+   /ATT_StartLTE99ADA = SUM(ATT_StartLTE99ADA)
    /ATT_StartLT90ADA = SUM(ATT_StartLT90ADA)
    /ATT_SOSMoveOn = SUM(ATT_SOSMoveOn)
    /IOG_ATT69_anyRawDP = SUM(IOG_ATT69_anyRawDP)
+   /RSO_ATT69_2RawDP = SUM(RSO_ATT69_2RawDP)
    /IOG_ATT69_2PerfLvlDP = SUM(IOG_ATT69_2PerfLvlDP)
+   /RSO_ATT69_StartLTE99ADA = SUM(RSO_ATT69_StartLTE99ADA)
+   /RSO_ATT69_1PercInc = SUM(RSO_ATT69_1PercInc)
    /IOG_ATT69_StartLT90ADA = SUM(IOG_ATT69_StartLT90ADA)
    /IOG_ATT69_SOSMoveOn = SUM(IOG_ATT69_SOSMoveOn)
-   /BOCY_ATT69_StartLT90ADA = SUM(BOCY_ATT69_StartLT90ADA).
+   /BOCY_ATT69_StartLT90ADA = SUM(BOCY_ATT69_StartLT90ADA)
+   /BEHSCH_anyRawDP = SUM(BEHSCH_anyRawDP)
+   /BEHSCH_2RawDP = SUM(BEHSCH_2RawDP)
+   /BEHSCH_StartGTE2SUS = SUM(BEHSCH_StartGTE2SUS)
+   /BEHSCH_SOSMoveOn = SUM(BEHSCH_SOSMoveOn)
+   /RSO_BEH39_anyRawDP = SUM(RSO_BEH39_anyRawDP)
+   /RSO_BEH39_2RawDP = SUM(RSO_BEH39_2RawDP)
+   /RSO_BEH39_StartGTE2SUS = SUM(RSO_BEH39_StartGTE2SUS)
+   /RSO_BEH39_SOSMoveOn = SUM(RSO_BEH39_SOSMoveOn).
 
 DATASET ACTIVATE FINALTEAMDATASET.
 
@@ -1883,6 +2051,17 @@ COMPUTE IOG_MTHAssess35_SOSMoveOnPerc = IOG_MTHAssess35_SOSMoveOn / IOG_MTHAsses
 COMPUTE IOG_MTHAssess69_SOSMoveOnPerc = IOG_MTHAssess69_SOSMoveOn / IOG_MTHAssess69_StartOffSlid.
 COMPUTE IOG_MTHCG69_SOSMoveOnPerc = IOG_MTHCG69_SOSMoveOn / IOG_MTHCG69_StartOffSlid.
 COMPUTE IOG_ATT69_SOSMoveOnPerc = IOG_ATT69_SOSMoveOn / IOG_ATT69_StartLT90ADA.
+COMPUTE RSO_LITAssess35_RawIncPerc = RSO_LITAssess35_RawInc / RSO_LITAssess35_2RawDP.
+COMPUTE RSO_LITAssess69_RawIncPerc = RSO_LITAssess69_RawInc / RSO_LITAssess69_2RawDP.
+COMPUTE RSO_ELACG69_RawIncPerc = RSO_ELACG69_RawInc / RSO_ELACG69_2RawDP.
+COMPUTE RSO_MTHAssess35_RawIncPerc = RSO_MTHAssess35_RawInc / RSO_MTHAssess35_2RawDP.
+COMPUTE RSO_MTHAssess69_RawIncPerc = RSO_MTHAssess69_RawInc / RSO_MTHAssess69_2RawDP.
+COMPUTE RSO_MTHCG69_RawIncPerc = RSO_MTHCG69_RawInc / RSO_MTHCG69_2RawDP.
+COMPUTE RSO_BEH39_SOSMoveOnPerc = RSO_BEH39_SOSMoveOn / RSO_BEH39_2RawDP.
+COMPUTE DN_LITAssess69_SOSMoveOnPerc = DN_LITAssess69_SOSMoveOn / DN_LITAssess69_StartOffSlid.
+COMPUTE DN_LITAssess69_RawIncPerc = DN_LITAssess69_RawInc / DN_LITAssess69_2RawDP.
+COMPUTE DN_MTHAssess69_SOSMoveOnPerc = DN_MTHAssess69_SOSMoveOn / DN_MTHAssess69_StartOffSlid.
+COMPUTE DN_MTHAssess69_RawIncPerc = DN_MTHAssess69_RawInc / DN_MTHAssess69_2RawDP.
 EXECUTE.
 
 ALTER TYPE RegionID cysdSiteID cysdSchoolID DNSchool TotIALIT TotIAMTH TotIAATT TotIABEH TEAMELAEnrollGoal TEAMMTHEnrollGoal TEAMATTEnrollGoal
@@ -1890,17 +2069,24 @@ TEAMBEHEnrollGoal TEAMELAQ2EnrollBench TEAMMTHQ2EnrollBench TEAMATTQ2EnrollBench
 TEAMMTHQ3EnrollBench TEAMATTQ3EnrollBench TEAMBEHQ3EnrollBench TEAMELADoseBench TEAMMTHDoseBench TEAMATTDoseBench
 TEAMBEHDoseBench TEAMELAQ2DoseGoal TEAMELAQ3DoseGoal TEAMELAQ4DoseGoal TEAMMTHQ2DoseGoal TEAMMTHQ3DoseGoal TEAMMTHQ4DoseGoal
 LITMet30Enroll MTHMet30Enroll ATTMet30Enroll BEHMet30Enroll LITMetQ2Dose LITMetQ3Dose LITMetQ4Dose MTHMetQ2Dose MTHMetQ3Dose MTHMetQ4Dose
-ATTMet56Dose BEHMet56Dose LITAssess_anyRawDP LITAssess_2PerfLvlDP LITAssess_StartOffSlid LITAssess_SOSMoveOn IOG_LITAssess35_anyRawDP
-IOG_LITAssess35_2PerfLvlDP IOG_LITAssess35_StartOffSlid IOG_LITAssess35_SOSMoveOn IOG_LITAssess69_anyRawDP IOG_LITAssess69_2PerfLvlDP
-IOG_LITAssess69_StartOffSlid IOG_LITAssess69_SOSMoveOn ELACG_anyRawDP ELACG_2PerfLvlDP ELACG_StartOffSlid ELACG_SOSMoveOn
-IOG_ELACG69_anyRawDP IOG_ELACG69_2PerfLvlDP IOG_ELACG69_StartOffSlid IOG_ELACG69_SOSMoveOn MTHAssess_anyRawDP MTHAssess_2PerfLvlDP
-MTHAssess_StartOffSlid MTHAssess_SOSMoveOn IOG_MTHAssess35_anyRawDP IOG_MTHAssess35_2PerfLvlDP IOG_MTHAssess35_StartOffSlid
-IOG_MTHAssess35_SOSMoveOn IOG_MTHAssess69_anyRawDP IOG_MTHAssess69_2PerfLvlDP IOG_MTHAssess69_StartOffSlid IOG_MTHAssess69_SOSMoveOn
-MTHCG_anyRawDP MTHCG_2PerfLvlDP MTHCG_StartOffSlid MTHCG_SOSMoveOn IOG_MTHCG69_anyRawDP IOG_MTHCG69_2PerfLvlDP
-IOG_MTHCG69_StartOffSlid IOG_MTHCG69_SOSMoveOn ATT_anyRawDP ATT_2PerfLvlDP ATT_StartLT90ADA ATT_SOSMoveOn IOG_ATT69_anyRawDP
-IOG_ATT69_2PerfLvlDP IOG_ATT69_StartLT90ADA IOG_ATT69_SOSMoveOn (F40.0) LITMetQ4DosePerc MTHMetQ4DosePerc ATTMet56DosePerc BEHMet56DosePerc
-IOG_LITAssess35_SOSMoveOnPerc IOG_LITAssess69_SOSMoveOnPerc IOG_ELACG69_SOSMoveOnPerc IOG_MTHAssess35_SOSMoveOnPerc
-IOG_MTHAssess69_SOSMoveOnPerc IOG_MTHCG69_SOSMoveOnPerc IOG_ATT69_SOSMoveOnPerc (F40.3).
+ATTMet56Dose BEHMet56Dose LITAssess_anyRawDP LITAssess_2RawDP LITAssess_2PerfLvlDP LITAssess_RawInc LITAssess_StartOffSlid
+LITAssess_SOSMoveOn IOG_LITAssess35_anyRawDP RSO_LITAssess35_2RawDP IOG_LITAssess35_2PerfLvlDP RSO_LITAssess35_RawInc
+IOG_LITAssess35_StartOffSlid IOG_LITAssess35_SOSMoveOn IOG_LITAssess69_anyRawDP RSO_LITAssess69_2RawDP IOG_LITAssess69_2PerfLvlDP
+RSO_LITAssess69_RawInc IOG_LITAssess69_StartOffSlid IOG_LITAssess69_SOSMoveOn ELACG_anyRawDP ELACG_2RawDP ELACG_2PerfLvlDP ELACG_RawInc
+ELACG_StartOffSlid ELACG_SOSMoveOn IOG_ELACG69_anyRawDP RSO_ELACG69_2RawDP IOG_ELACG69_2PerfLvlDP RSO_ELACG69_RawInc
+IOG_ELACG69_StartOffSlid IOG_ELACG69_SOSMoveOn MTHAssess_anyRawDP MTHAssess_2RawDP MTHAssess_2PerfLvlDP MTHAssess_RawInc
+MTHAssess_StartOffSlid MTHAssess_SOSMoveOn IOG_MTHAssess35_anyRawDP RSO_MTHAssess35_2RawDP IOG_MTHAssess35_2PerfLvlDP
+RSO_MTHAssess35_RawInc IOG_MTHAssess35_StartOffSlid IOG_MTHAssess35_SOSMoveOn IOG_MTHAssess69_anyRawDP RSO_MTHAssess69_2RawDP
+IOG_MTHAssess69_2PerfLvlDP RSO_MTHAssess69_RawInc IOG_MTHAssess69_StartOffSlid IOG_MTHAssess69_SOSMoveOn MTHCG_anyRawDP
+MTHCG_2RawDP MTHCG_2PerfLvlDP MTHCG_RawInc MTHCG_StartOffSlid MTHCG_SOSMoveOn IOG_MTHCG69_anyRawDP RSO_MTHCG69_2RawDP
+IOG_MTHCG69_2PerfLvlDP RSO_MTHCG69_RawInc IOG_MTHCG69_StartOffSlid IOG_MTHCG69_SOSMoveOn ATT_anyRawDP ATT_2RawDP ATT_2PerfLvlDP
+ATT_StartLTE99ADA ATT_StartLT90ADA ATT_SOSMoveOn IOG_ATT69_anyRawDP RSO_ATT69_2RawDP IOG_ATT69_2PerfLvlDP RSO_ATT69_StartLTE99ADA
+IOG_ATT69_StartLT90ADA RSO_ATT69_1PercInc IOG_ATT69_SOSMoveOn (F40.0)
+LITMetQ4DosePerc MTHMetQ4DosePerc ATTMet56DosePerc BEHMet56DosePerc IOG_LITAssess35_SOSMoveOnPerc IOG_LITAssess69_SOSMoveOnPerc
+IOG_ELACG69_SOSMoveOnPerc IOG_MTHAssess35_SOSMoveOnPerc IOG_MTHAssess69_SOSMoveOnPerc IOG_MTHCG69_SOSMoveOnPerc
+IOG_ATT69_SOSMoveOnPerc RSO_LITAssess35_RawIncPerc RSO_LITAssess69_RawIncPerc RSO_ELACG69_RawIncPerc RSO_MTHAssess35_RawIncPerc
+RSO_MTHAssess69_RawIncPerc RSO_MTHCG69_RawIncPerc RSO_BEH39_SOSMoveOnPerc DN_LITAssess69_SOSMoveOnPerc DN_LITAssess69_RawIncPerc
+DN_MTHAssess69_SOSMoveOnPerc DN_MTHAssess69_RawIncPerc (F40.3).
 
 ***** Add variable labels.
 VARIABLE LABELS cyStudentIDCount "Total number of student records"
@@ -1956,58 +2142,103 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_BEH35_OfficialFL "IOG: 3rd-5th Grade Behavior: Number of students on official focus lists"
    IOG_BEH69_OfficialFL "IOG: 6th-9th Grade Bheavior: Number of students on official focus lists"
    LITAssess_anyRawDP "Number of students with at least one raw literacy assessment performance data point"
+   LITAssess_2RawDP "Number of students with at least two literacy assessment raw score data points"
    LITAssess_2PerfLvlDP "Number of students with at least two literacy assessment performance level data points"
+   LITAssess_RawInc "Number of students who improved in literacy assessment raw scores"
    LITAssess_StartOffSlid "Number of students who started off-track or sliding in literacy assessments"
    LITAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in literacy assessments"
    IOG_LITAssess35_anyRawDP "IOG: 3rd-5th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   RSO_LITAssess35_2RawDP "3rd-5th Grade Literacy Assessments: Number of students who had at least two raw score data points"
    IOG_LITAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   RSO_LITAssess35_RawInc "3rd-5th Grade Literacy Assessments: Number of students who improved raw scores"
    IOG_LITAssess35_StartOffSlid "IOG: 3rd-5th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess35_SOSMoveOn "IOG: 3rd-5th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
    IOG_LITAssess69_anyRawDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   RSO_LITAssess69_2RawDP "6th-9th Grade Literacy Assessments: Number of students who had at least two raw score data points"
    IOG_LITAssess69_2PerfLvlDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   RSO_LITAssess69_RawInc "6th-9th Grade Literacy Assessments: Number of students who improved raw scores"
    IOG_LITAssess69_StartOffSlid "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
+   DN_LITAssess69_anyRawDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   DN_LITAssess69_2RawDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least two raw scores data points"
+   DN_LITAssess69_2PerfLvlDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   DN_LITAssess69_RawInc "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who improved raw scores"
+   DN_LITAssess69_StartOffSlid "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
+   DN_LITAssess69_SOSMoveOn "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
    BOCY_LITAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    BOCY_LITAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    ELACG_anyRawDP "Number of students with at least one ELA course grade performance data point"
+   ELACG_2RawDP "Number of students with at least two ELA course grade data points"
    ELACG_2PerfLvlDP "Number of students with at least two ELA course grade performance level data points"
+   ELACG_RawInc "Number of students who improved at least one letter grade in ELA"
    ELACG_StartOffSlid "Number of students who started off-track or sliding in ELA course grades"
    ELACG_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in ELA course grades"
    IOG_ELACG69_anyRawDP "IOG: 6th-9th Grade ELA Course Grades: Number of students who had at least one course grade performance data point"
+   RSO_ELACG69_2RawDP "6th-9th Grade ELA Course Grades: Number of students who had at least two course grade data points"
    IOG_ELACG69_2PerfLvlDP "IOG: 6th-9th Grade ELA Course Grades: Number of students who had at least two performance level data points"
+   RSO_ELACG69_RawInc "6th-9th Grade ELA Course Grades: Number of students who improved at least one letter grade"
    IOG_ELACG69_StartOffSlid "IOG: 6th-9th Grade ELA Course Grades: Number of students who started off-track or sliding"
    IOG_ELACG69_SOSMoveOn "IOG: 6th-9th Grade ELA Course Grades: Number of students who started off-track or sliding and moved back on-track"
    MTHAssess_anyRawDP "Number of students with at least one raw math assessment performance data point"
+   MTHAssess_2RawDP "Number of students with at least two math assessment raw score data points"
    MTHAssess_2PerfLvlDP "Number of students with at least two math assessment performance level data points"
+   MTHAssess_RawInc "Number of students who improved in math assessment raw scores"
    MTHAssess_StartOffSlid "Number of students who started off-track or sliding in math assessments"
    MTHAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math assessments"
    IOG_MTHAssess35_anyRawDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   RSO_MTHAssess35_2RawDP "3rd-5th Grade Math Assessments: Number of students who had at least two raw score data points"
    IOG_MTHAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least two performance level data points"
+   RSO_MTHAssess35_RawInc "3rd-5th Grade Math Assessments: Number of students who improved raw scores"
    IOG_MTHAssess35_StartOffSlid "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess35_SOSMoveOn "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
    IOG_MTHAssess69_anyRawDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   RSO_MTHAssess69_2RawDP "6th-9th Grade Math Assessments: Number of students who had at least two raw score data points"
    IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   RSO_MTHAssess69_RawInc "6th-9th Grade Math Assessments: Number of students who improved raw scores"
    IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   DN_MTHAssess69_anyRawDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   DN_MTHAssess69_2RawDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least two raw scores data points"
+   DN_MTHAssess69_2PerfLvlDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   DN_MTHAssess69_RawInc "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who improved raw scores"
+   DN_MTHAssess69_StartOffSlid "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
+   DN_MTHAssess69_SOSMoveOn "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
    BOCY_MTHAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    BOCY_MTHAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    MTHCG_anyRawDP "Number of students with at least one math course grade performance data point"
+   MTHCG_2RawDP "Number of students with at least two math course grade data points"
    MTHCG_2PerfLvlDP "Number of students with at least two math course grade performance level data points"
+   MTHCG_RawInc "Number of students who improved at least one letter grade in math"
    MTHCG_StartOffSlid "Number of students who started off-track or sliding in math course grades"
    MTHCG_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math course grades"
    IOG_MTHCG69_anyRawDP "IOG: 6th-9th Grade Math Course Grades: Number of students who had at least one course grade performance data point"
+   RSO_MTHCG69_2RawDP "6th-9th Grade Math Course Grades: Number of students who had at least two course grade data points"
    IOG_MTHCG69_2PerfLvlDP "IOG: 6th-9th Grade Math Course Grades: Number of students who had at least two performance level data points"
+   RSO_MTHCG69_RawInc "6th-9th Grade Math Course Grades: Number of students who improved at least one letter grade"
    IOG_MTHCG69_StartOffSlid "IOG: 6th-9th Grade Math Course Grades: Number of students who started off-track or sliding"
    IOG_MTHCG69_SOSMoveOn "IOG: 6th-9th Grade Math Course Grades: Number of students who started off-track or sliding and moved back on-track"
    ATT_anyRawDP "Number of students with at least one attendance (ADA) performance data point"
+   ATT_2RawDP "Number of students with at least two attendance (ADA) performance data points"
    ATT_2PerfLvlDP "Number of students with at least two attendance (ADA) performance level data points"
+   ATT_StartLTE99ADA "Number of students who started with less than or equal to 99% average daily attendance"
    ATT_StartLT90ADA "Number of students who started with less than 90% average daily attendance"
    ATT_SOSMoveOn "Number of students who started below 90% ADA and moved to at or above 90% ADA"
    IOG_ATT69_anyRawDP "IOG: 6th-9th Grade Attendance: Number of students who had at least one ADA performance data point"
+   RSO_ATT69_2RawDP "6th-9th Grade Attendance: Number of students who had at least two performance data points"
    IOG_ATT69_2PerfLvlDP "IOG: 6th-9th Grade Attendance: Number of students who had at least two performance level data points"
+   RSO_ATT69_StartLTE99ADA "6th-9th Grade Attendance: Number of students who started with less than or equal to 99% average daily attendance"
+   RSO_ATT69_1PercInc "6th-9th Grade Attendance: Number of students who improved ADA by at least 1 percentage point"
    IOG_ATT69_StartLT90ADA "IOG: 6th-9th Grade Attendance: Number of students who started with less than 90% average daily attendance"
    IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA"
    BOCY_ATT69_StartLT90ADA "Best of City Year: 6th-9th Grade Attendance: Number of students on official focus lists, enrolled 56+ days, and started with less than 90% average daily attendance"
+   BEHSCH_anyRawDP "Number of students with at least one suspension data point"
+   BEHSCH_2RawDP "Number of students with at least two suspension data points"
+   BEHSCH_StartGTE2SUS "Number of students who started with at least two suspensions"
+   BEHSCH_SOSMoveOn "Number of students who started with at least two suspensions and ended with less than 2 suspensions"
+   RSO_BEH39_anyRawDP "3rd-9th Grade Behavior: Number of students with at least one suspension data point"
+   RSO_BEH39_2RawDP "3rd-9th Grade Behavior: Number of students with at least two suspension data points"
+   RSO_BEH39_StartGTE2SUS "3rd-9th Grade Behavior: Number of students who started with at least two suspensions"
+   RSO_BEH39_SOSMoveOn "3rd-9th Grade Behavior: Number of students who started with at least two suspensions and ended with less than 2 suspensions"
    LITMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting ELA/Literacy Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    MTHMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting Math Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    ATTMet56DosePerc "DOSAGE ACTUAL\n% of Students Enrolled 56+ Days (Attendance, out of ACTUAL FL Enrollment)"
@@ -2018,7 +2249,18 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_MTHAssess35_SOSMoveOnPerc "IOG ACTUAL\n3rd-5th Grade Math: % of Students who Moved from Below Benchmark on Math Skills Assessments to At/Above Benchmark"
    IOG_MTHAssess69_SOSMoveOnPerc "IOG ACTUAL\n6th-9th Grade Math: % of Students who Moved from Below Benchmark on Math Skills Assessments to At/Above Benchmark"
    IOG_MTHCG69_SOSMoveOnPerc 'IOG ACTUAL\n6th-9th Grade Math: % of Students who Moved from a Math Course Grade of "D" or Lower to a "C" or Higher'
-   IOG_ATT69_SOSMoveOnPerc "IOG ACTUAL\n6th-9th Grade Attendance: % of Students who Moved from Below 90% ADA to At/Above 90% ADA".
+   IOG_ATT69_SOSMoveOnPerc "IOG ACTUAL\n6th-9th Grade Attendance: % of Students who Moved from Below 90% ADA to At/Above 90% ADA"
+   RSO_LITAssess35_RawIncPerc "3rd-5th Grade Literacy: % of Students who Improved Raw Scores on Literacy Skills Assessments"
+   RSO_LITAssess69_RawIncPerc "6th-9th Grade Literacy: % of Students who Improved Raw Scores on Literacy Skills Assessments"
+   RSO_ELACG69_RawIncPerc "6th-9th Grade ELA: % of Students who Improved at Least One Letter Grade"
+   RSO_MTHAssess35_RawIncPerc "3rd-5th Grade Math: % of Students who Improved Raw Scores on Math Skills Assessments"
+   RSO_MTHAssess69_RawIncPerc "6th-9th Grade Math: % of Students who Improved Raw Scores on Math Skills Assessments"
+   RSO_MTHCG69_RawIncPerc "6th-9th Grade Math: % of Students who Improved at Least One Letter Grade"
+   RSO_BEH39_SOSMoveOnPerc "3rd-9th Grade Behavior: % of Students No Longer at Risk (2 or more suspensions to 1 or fewer suspensions)"
+   DN_LITAssess69_SOSMoveOnPerc "Diploma's Now: % of Students who Moved Back On-Track in Literacy Skills Assessments"
+   DN_LITAssess69_RawIncPerc "Diploma's Now: % of Students who Improved Raw Scores on Literacy Skills Assessments"
+   DN_MTHAssess69_SOSMoveOnPerc "Diploma's Now: % of Students who Moved Back On-Track in Math Skills Assessments"
+   DN_MTHAssess69_RawIncPerc "Diploma's Now: % of Students who Improved Raw Scores on Math Skills Assessments".
 
 VALUE LABELS DNSchool 0 "Not a Diplomas Now School"
    1 "Diplomas Now School".
@@ -2105,58 +2347,103 @@ AGGREGATE /OUTFILE = FINALSITEDATASET
    /IOG_BEH35_OfficialFL = SUM(IOG_BEH35_OfficialFL)
    /IOG_BEH69_OfficialFL = SUM(IOG_BEH69_OfficialFL)
    /LITAssess_anyRawDP = SUM(LITAssess_anyRawDP)
+   /LITAssess_2RawDP = SUM(LITAssess_2RawDP)
    /LITAssess_2PerfLvlDP = SUM(LITAssess_2PerfLvlDP)
+   /LITAssess_RawInc = SUM(LITAssess_RawInc)
    /LITAssess_StartOffSlid = SUM(LITAssess_StartOffSlid)
    /LITAssess_SOSMoveOn = SUM(LITAssess_SOSMoveOn)
    /IOG_LITAssess35_anyRawDP = SUM(IOG_LITAssess35_anyRawDP)
+   /RSO_LITAssess35_2RawDP = SUM(RSO_LITAssess35_2RawDP)
    /IOG_LITAssess35_2PerfLvlDP = SUM(IOG_LITAssess35_2PerfLvlDP)
+   /RSO_LITAssess35_RawInc = SUM(RSO_LITAssess35_RawInc)
    /IOG_LITAssess35_StartOffSlid = SUM(IOG_LITAssess35_StartOffSlid)
    /IOG_LITAssess35_SOSMoveOn = SUM(IOG_LITAssess35_SOSMoveOn)
    /IOG_LITAssess69_anyRawDP = SUM(IOG_LITAssess69_anyRawDP)
+   /RSO_LITAssess69_2RawDP = SUM(RSO_LITAssess69_2RawDP)
    /IOG_LITAssess69_2PerfLvlDP = SUM(IOG_LITAssess69_2PerfLvlDP)
+   /RSO_LITAssess69_RawInc = SUM(RSO_LITAssess69_RawInc)
    /IOG_LITAssess69_StartOffSlid = SUM(IOG_LITAssess69_StartOffSlid)
    /IOG_LITAssess69_SOSMoveOn = SUM(IOG_LITAssess69_SOSMoveOn)
+   /DN_LITAssess69_anyRawDP = SUM(DN_LITAssess69_anyRawDP)
+   /DN_LITAssess69_2RawDP = SUM(DN_LITAssess69_2RawDP)
+   /DN_LITAssess69_2PerfLvlDP = SUM(DN_LITAssess69_2PerfLvlDP)
+   /DN_LITAssess69_RawInc = SUM(DN_LITAssess69_RawInc)
+   /DN_LITAssess69_StartOffSlid = SUM(DN_LITAssess69_StartOffSlid)
+   /DN_LITAssess69_SOSMoveOn = SUM(DN_LITAssess69_SOSMoveOn)
    /BOCY_LITAssess35_StartOffSlid = SUM(BOCY_LITAssess35_StartOffSlid)
    /BOCY_LITAssess69_StartOffSlid = SUM(BOCY_LITAssess69_StartOffSlid)
    /ELACG_anyRawDP = SUM(ELACG_anyRawDP)
+   /ELACG_2RawDP = SUM(ELACG_2RawDP)
    /ELACG_2PerfLvlDP = SUM(ELACG_2PerfLvlDP)
+   /ELACG_RawInc = SUM(ELACG_RawInc)
    /ELACG_StartOffSlid = SUM(ELACG_StartOffSlid)
    /ELACG_SOSMoveOn = SUM(ELACG_SOSMoveOn)
    /IOG_ELACG69_anyRawDP = SUM(IOG_ELACG69_anyRawDP)
+   /RSO_ELACG69_2RawDP = SUM(RSO_ELACG69_2RawDP)
    /IOG_ELACG69_2PerfLvlDP = SUM(IOG_ELACG69_2PerfLvlDP)
+   /RSO_ELACG69_RawInc = SUM(RSO_ELACG69_RawInc)
    /IOG_ELACG69_StartOffSlid = SUM(IOG_ELACG69_StartOffSlid)
    /IOG_ELACG69_SOSMoveOn = SUM(IOG_ELACG69_SOSMoveOn)
    /MTHAssess_anyRawDP = SUM(MTHAssess_anyRawDP)
+   /MTHAssess_2RawDP = SUM(MTHAssess_2RawDP)
    /MTHAssess_2PerfLvlDP = SUM(MTHAssess_2PerfLvlDP)
+   /MTHAssess_RawInc = SUM(MTHAssess_RawInc)
    /MTHAssess_StartOffSlid = SUM(MTHAssess_StartOffSlid)
    /MTHAssess_SOSMoveOn = SUM(MTHAssess_SOSMoveOn)
    /IOG_MTHAssess35_anyRawDP = SUM(IOG_MTHAssess35_anyRawDP)
+   /RSO_MTHAssess35_2RawDP = SUM(RSO_MTHAssess35_2RawDP)
    /IOG_MTHAssess35_2PerfLvlDP = SUM(IOG_MTHAssess35_2PerfLvlDP)
+   /RSO_MTHAssess35_RawInc = SUM(RSO_MTHAssess35_RawInc)
    /IOG_MTHAssess35_StartOffSlid = SUM(IOG_MTHAssess35_StartOffSlid)
    /IOG_MTHAssess35_SOSMoveOn = SUM(IOG_MTHAssess35_SOSMoveOn)
    /IOG_MTHAssess69_anyRawDP = SUM(IOG_MTHAssess69_anyRawDP)
+   /RSO_MTHAssess69_2RawDP = SUM(RSO_MTHAssess69_2RawDP)
    /IOG_MTHAssess69_2PerfLvlDP = SUM(IOG_MTHAssess69_2PerfLvlDP)
+   /RSO_MTHAssess69_RawInc = SUM(RSO_MTHAssess69_RawInc)
    /IOG_MTHAssess69_StartOffSlid = SUM(IOG_MTHAssess69_StartOffSlid)
    /IOG_MTHAssess69_SOSMoveOn = SUM(IOG_MTHAssess69_SOSMoveOn)
+   /DN_MTHAssess69_anyRawDP = SUM(DN_MTHAssess69_anyRawDP)
+   /DN_MTHAssess69_2RawDP = SUM(DN_MTHAssess69_2RawDP)
+   /DN_MTHAssess69_2PerfLvlDP = SUM(DN_MTHAssess69_2PerfLvlDP)
+   /DN_MTHAssess69_RawInc = SUM(DN_MTHAssess69_RawInc)
+   /DN_MTHAssess69_StartOffSlid = SUM(DN_MTHAssess69_StartOffSlid)
+   /DN_MTHAssess69_SOSMoveOn = SUM(DN_MTHAssess69_SOSMoveOn)
    /BOCY_MTHAssess35_StartOffSlid = SUM(BOCY_MTHAssess35_StartOffSlid)
    /BOCY_MTHAssess69_StartOffSlid = SUM(BOCY_MTHAssess69_StartOffSlid)
    /MTHCG_anyRawDP = SUM(MTHCG_anyRawDP)
+   /MTHCG_2RawDP = SUM(MTHCG_2RawDP)
    /MTHCG_2PerfLvlDP = SUM(MTHCG_2PerfLvlDP)
+   /MTHCG_RawInc = SUM(MTHCG_RawInc)
    /MTHCG_StartOffSlid = SUM(MTHCG_StartOffSlid)
    /MTHCG_SOSMoveOn = SUM(MTHCG_SOSMoveOn)
    /IOG_MTHCG69_anyRawDP = SUM(IOG_MTHCG69_anyRawDP)
+   /RSO_MTHCG69_2RawDP = SUM(RSO_MTHCG69_2RawDP)
    /IOG_MTHCG69_2PerfLvlDP = SUM(IOG_MTHCG69_2PerfLvlDP)
+   /RSO_MTHCG69_RawInc = SUM(RSO_MTHCG69_RawInc)
    /IOG_MTHCG69_StartOffSlid = SUM(IOG_MTHCG69_StartOffSlid)
    /IOG_MTHCG69_SOSMoveOn = SUM(IOG_MTHCG69_SOSMoveOn)
    /ATT_anyRawDP = SUM(ATT_anyRawDP)
+   /ATT_2RawDP = SUM(ATT_2RawDP)
    /ATT_2PerfLvlDP = SUM(ATT_2PerfLvlDP)
+   /ATT_StartLTE99ADA = SUM(ATT_StartLTE99ADA)
    /ATT_StartLT90ADA = SUM(ATT_StartLT90ADA)
    /ATT_SOSMoveOn = SUM(ATT_SOSMoveOn)
    /IOG_ATT69_anyRawDP = SUM(IOG_ATT69_anyRawDP)
+   /RSO_ATT69_2RawDP = SUM(RSO_ATT69_2RawDP)
    /IOG_ATT69_2PerfLvlDP = SUM(IOG_ATT69_2PerfLvlDP)
+   /RSO_ATT69_StartLTE99ADA = SUM(RSO_ATT69_StartLTE99ADA)
+   /RSO_ATT69_1PercInc = SUM(RSO_ATT69_1PercInc)
    /IOG_ATT69_StartLT90ADA = SUM(IOG_ATT69_StartLT90ADA)
    /IOG_ATT69_SOSMoveOn = SUM(IOG_ATT69_SOSMoveOn)
-   /BOCY_ATT69_StartLT90ADA = SUM(BOCY_ATT69_StartLT90ADA).
+   /BOCY_ATT69_StartLT90ADA = SUM(BOCY_ATT69_StartLT90ADA)
+   /BEHSCH_anyRawDP = SUM(BEHSCH_anyRawDP)
+   /BEHSCH_2RawDP = SUM(BEHSCH_2RawDP)
+   /BEHSCH_StartGTE2SUS = SUM(BEHSCH_StartGTE2SUS)
+   /BEHSCH_SOSMoveOn = SUM(BEHSCH_SOSMoveOn)
+   /RSO_BEH39_anyRawDP = SUM(RSO_BEH39_anyRawDP)
+   /RSO_BEH39_2RawDP = SUM(RSO_BEH39_2RawDP)
+   /RSO_BEH39_StartGTE2SUS = SUM(RSO_BEH39_StartGTE2SUS)
+   /RSO_BEH39_SOSMoveOn = SUM(RSO_BEH39_SOSMoveOn).
 
 DATASET ACTIVATE FINALSITEDATASET.
 
@@ -2172,6 +2459,17 @@ COMPUTE IOG_MTHAssess35_SOSMoveOnPerc = IOG_MTHAssess35_SOSMoveOn / IOG_MTHAsses
 COMPUTE IOG_MTHAssess69_SOSMoveOnPerc = IOG_MTHAssess69_SOSMoveOn / IOG_MTHAssess69_StartOffSlid.
 COMPUTE IOG_MTHCG69_SOSMoveOnPerc = IOG_MTHCG69_SOSMoveOn / IOG_MTHCG69_StartOffSlid.
 COMPUTE IOG_ATT69_SOSMoveOnPerc = IOG_ATT69_SOSMoveOn / IOG_ATT69_StartLT90ADA.
+COMPUTE RSO_LITAssess35_RawIncPerc = RSO_LITAssess35_RawInc / RSO_LITAssess35_2RawDP.
+COMPUTE RSO_LITAssess69_RawIncPerc = RSO_LITAssess69_RawInc / RSO_LITAssess69_2RawDP.
+COMPUTE RSO_ELACG69_RawIncPerc = RSO_ELACG69_RawInc / RSO_ELACG69_2RawDP.
+COMPUTE RSO_MTHAssess35_RawIncPerc = RSO_MTHAssess35_RawInc / RSO_MTHAssess35_2RawDP.
+COMPUTE RSO_MTHAssess69_RawIncPerc = RSO_MTHAssess69_RawInc / RSO_MTHAssess69_2RawDP.
+COMPUTE RSO_MTHCG69_RawIncPerc = RSO_MTHCG69_RawInc / RSO_MTHCG69_2RawDP.
+COMPUTE RSO_BEH39_SOSMoveOnPerc = RSO_BEH39_SOSMoveOn / RSO_BEH39_2RawDP.
+COMPUTE DN_LITAssess69_SOSMoveOnPerc = DN_LITAssess69_SOSMoveOn / DN_LITAssess69_StartOffSlid.
+COMPUTE DN_LITAssess69_RawIncPerc = DN_LITAssess69_RawInc / DN_LITAssess69_2RawDP.
+COMPUTE DN_MTHAssess69_SOSMoveOnPerc = DN_MTHAssess69_SOSMoveOn / DN_MTHAssess69_StartOffSlid.
+COMPUTE DN_MTHAssess69_RawIncPerc = DN_MTHAssess69_RawInc / DN_MTHAssess69_2RawDP.
 EXECUTE.
 
 ALTER TYPE RegionID cyStudentIDCount cysdSiteID DNSchoolCount TotIALIT TotIAMTH TotIAATT TotIABEH SITEELAEnrollGoal SITEMTHEnrollGoal
@@ -2180,17 +2478,24 @@ SITEMTHQ3EnrollBench SITEATTQ3EnrollBench SITEBEHQ3EnrollBench SITEELADoseBench 
 TEAMELAQ2DoseGoalMin TEAMELAQ3DoseGoalMin TEAMELAQ4DoseGoalMin TEAMELAQ2DoseGoalMax TEAMELAQ3DoseGoalMax TEAMELAQ4DoseGoalMax
 TEAMMTHQ2DoseGoalMin TEAMMTHQ3DoseGoalMin TEAMMTHQ4DoseGoalMin TEAMMTHQ2DoseGoalMax TEAMMTHQ3DoseGoalMax TEAMMTHQ4DoseGoalMax
 LITMet30Enroll MTHMet30Enroll ATTMet30Enroll BEHMet30Enroll LITMetQ2Dose LITMetQ3Dose LITMetQ4Dose MTHMetQ2Dose MTHMetQ3Dose MTHMetQ4Dose
-ATTMet56Dose BEHMet56Dose LITAssess_anyRawDP LITAssess_2PerfLvlDP LITAssess_StartOffSlid LITAssess_SOSMoveOn IOG_LITAssess35_anyRawDP
-IOG_LITAssess35_2PerfLvlDP IOG_LITAssess35_StartOffSlid IOG_LITAssess35_SOSMoveOn IOG_LITAssess69_anyRawDP IOG_LITAssess69_2PerfLvlDP
-IOG_LITAssess69_StartOffSlid IOG_LITAssess69_SOSMoveOn ELACG_anyRawDP ELACG_2PerfLvlDP ELACG_StartOffSlid ELACG_SOSMoveOn
-IOG_ELACG69_anyRawDP IOG_ELACG69_2PerfLvlDP IOG_ELACG69_StartOffSlid IOG_ELACG69_SOSMoveOn MTHAssess_anyRawDP MTHAssess_2PerfLvlDP
-MTHAssess_StartOffSlid MTHAssess_SOSMoveOn IOG_MTHAssess35_anyRawDP IOG_MTHAssess35_2PerfLvlDP IOG_MTHAssess35_StartOffSlid
-IOG_MTHAssess35_SOSMoveOn IOG_MTHAssess69_anyRawDP IOG_MTHAssess69_2PerfLvlDP IOG_MTHAssess69_StartOffSlid IOG_MTHAssess69_SOSMoveOn
-MTHCG_anyRawDP MTHCG_2PerfLvlDP MTHCG_StartOffSlid MTHCG_SOSMoveOn IOG_MTHCG69_anyRawDP IOG_MTHCG69_2PerfLvlDP
-IOG_MTHCG69_StartOffSlid IOG_MTHCG69_SOSMoveOn ATT_anyRawDP ATT_2PerfLvlDP ATT_StartLT90ADA ATT_SOSMoveOn IOG_ATT69_anyRawDP
-IOG_ATT69_2PerfLvlDP IOG_ATT69_StartLT90ADA IOG_ATT69_SOSMoveOn (F40.0) LITMetQ4DosePerc MTHMetQ4DosePerc ATTMet56DosePerc BEHMet56DosePerc
-IOG_LITAssess35_SOSMoveOnPerc IOG_LITAssess69_SOSMoveOnPerc IOG_ELACG69_SOSMoveOnPerc IOG_MTHAssess35_SOSMoveOnPerc
-IOG_MTHAssess69_SOSMoveOnPerc IOG_MTHCG69_SOSMoveOnPerc IOG_ATT69_SOSMoveOnPerc (F40.3).
+ATTMet56Dose BEHMet56Dose LITAssess_anyRawDP LITAssess_2RawDP LITAssess_2PerfLvlDP LITAssess_RawInc LITAssess_StartOffSlid
+LITAssess_SOSMoveOn IOG_LITAssess35_anyRawDP RSO_LITAssess35_2RawDP IOG_LITAssess35_2PerfLvlDP RSO_LITAssess35_RawInc
+IOG_LITAssess35_StartOffSlid IOG_LITAssess35_SOSMoveOn IOG_LITAssess69_anyRawDP RSO_LITAssess69_2RawDP IOG_LITAssess69_2PerfLvlDP
+RSO_LITAssess69_RawInc IOG_LITAssess69_StartOffSlid IOG_LITAssess69_SOSMoveOn ELACG_anyRawDP ELACG_2RawDP ELACG_2PerfLvlDP ELACG_RawInc
+ELACG_StartOffSlid ELACG_SOSMoveOn IOG_ELACG69_anyRawDP RSO_ELACG69_2RawDP IOG_ELACG69_2PerfLvlDP RSO_ELACG69_RawInc
+IOG_ELACG69_StartOffSlid IOG_ELACG69_SOSMoveOn MTHAssess_anyRawDP MTHAssess_2RawDP MTHAssess_2PerfLvlDP MTHAssess_RawInc
+MTHAssess_StartOffSlid MTHAssess_SOSMoveOn IOG_MTHAssess35_anyRawDP RSO_MTHAssess35_2RawDP IOG_MTHAssess35_2PerfLvlDP
+RSO_MTHAssess35_RawInc IOG_MTHAssess35_StartOffSlid IOG_MTHAssess35_SOSMoveOn IOG_MTHAssess69_anyRawDP RSO_MTHAssess69_2RawDP
+IOG_MTHAssess69_2PerfLvlDP RSO_MTHAssess69_RawInc IOG_MTHAssess69_StartOffSlid IOG_MTHAssess69_SOSMoveOn MTHCG_anyRawDP
+MTHCG_2RawDP MTHCG_2PerfLvlDP MTHCG_RawInc MTHCG_StartOffSlid MTHCG_SOSMoveOn IOG_MTHCG69_anyRawDP RSO_MTHCG69_2RawDP
+IOG_MTHCG69_2PerfLvlDP RSO_MTHCG69_RawInc IOG_MTHCG69_StartOffSlid IOG_MTHCG69_SOSMoveOn ATT_anyRawDP ATT_2RawDP ATT_2PerfLvlDP
+ATT_StartLTE99ADA ATT_StartLT90ADA ATT_SOSMoveOn IOG_ATT69_anyRawDP RSO_ATT69_2RawDP IOG_ATT69_2PerfLvlDP RSO_ATT69_StartLTE99ADA
+IOG_ATT69_StartLT90ADA RSO_ATT69_1PercInc IOG_ATT69_SOSMoveOn (F40.0)
+LITMetQ4DosePerc MTHMetQ4DosePerc ATTMet56DosePerc BEHMet56DosePerc IOG_LITAssess35_SOSMoveOnPerc IOG_LITAssess69_SOSMoveOnPerc
+IOG_ELACG69_SOSMoveOnPerc IOG_MTHAssess35_SOSMoveOnPerc IOG_MTHAssess69_SOSMoveOnPerc IOG_MTHCG69_SOSMoveOnPerc
+IOG_ATT69_SOSMoveOnPerc RSO_LITAssess35_RawIncPerc RSO_LITAssess69_RawIncPerc RSO_ELACG69_RawIncPerc RSO_MTHAssess35_RawIncPerc
+RSO_MTHAssess69_RawIncPerc RSO_MTHCG69_RawIncPerc RSO_BEH39_SOSMoveOnPerc DN_LITAssess69_SOSMoveOnPerc DN_LITAssess69_RawIncPerc
+DN_MTHAssess69_SOSMoveOnPerc DN_MTHAssess69_RawIncPerc (F40.3).
 
 ***** Add variable labels.
 VARIABLE LABELS cyStudentIDCount "Total number of student records"
@@ -2253,58 +2558,103 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_BEH35_OfficialFL "IOG: 3rd-5th Grade Behavior: Number of students on official focus lists"
    IOG_BEH69_OfficialFL "IOG: 6th-9th Grade Bheavior: Number of students on official focus lists"
    LITAssess_anyRawDP "Number of students with at least one raw literacy assessment performance data point"
+   LITAssess_2RawDP "Number of students with at least two literacy assessment raw score data points"
    LITAssess_2PerfLvlDP "Number of students with at least two literacy assessment performance level data points"
+   LITAssess_RawInc "Number of students who improved in literacy assessment raw scores"
    LITAssess_StartOffSlid "Number of students who started off-track or sliding in literacy assessments"
    LITAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in literacy assessments"
    IOG_LITAssess35_anyRawDP "IOG: 3rd-5th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   RSO_LITAssess35_2RawDP "3rd-5th Grade Literacy Assessments: Number of students who had at least two raw score data points"
    IOG_LITAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   RSO_LITAssess35_RawInc "3rd-5th Grade Literacy Assessments: Number of students who improved raw scores"
    IOG_LITAssess35_StartOffSlid "IOG: 3rd-5th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess35_SOSMoveOn "IOG: 3rd-5th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
    IOG_LITAssess69_anyRawDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   RSO_LITAssess69_2RawDP "6th-9th Grade Literacy Assessments: Number of students who had at least two raw score data points"
    IOG_LITAssess69_2PerfLvlDP "IOG: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   RSO_LITAssess69_RawInc "6th-9th Grade Literacy Assessments: Number of students who improved raw scores"
    IOG_LITAssess69_StartOffSlid "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
    IOG_LITAssess69_SOSMoveOn "IOG: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
+   DN_LITAssess69_anyRawDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least one raw performance data point"
+   DN_LITAssess69_2RawDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least two raw scores data points"
+   DN_LITAssess69_2PerfLvlDP "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who had at least two performance level data points"
+   DN_LITAssess69_RawInc "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who improved raw scores"
+   DN_LITAssess69_StartOffSlid "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding"
+   DN_LITAssess69_SOSMoveOn "Diplomas Now: 6th-9th Grade Literacy Assessments: Number of students who started off-track or sliding and moved back on-track"
    BOCY_LITAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    BOCY_LITAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Literacy Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    ELACG_anyRawDP "Number of students with at least one ELA course grade performance data point"
+   ELACG_2RawDP "Number of students with at least two ELA course grade data points"
    ELACG_2PerfLvlDP "Number of students with at least two ELA course grade performance level data points"
+   ELACG_RawInc "Number of students who improved at least one letter grade in ELA"
    ELACG_StartOffSlid "Number of students who started off-track or sliding in ELA course grades"
    ELACG_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in ELA course grades"
    IOG_ELACG69_anyRawDP "IOG: 6th-9th Grade ELA Course Grades: Number of students who had at least one course grade performance data point"
+   RSO_ELACG69_2RawDP "6th-9th Grade ELA Course Grades: Number of students who had at least two course grade data points"
    IOG_ELACG69_2PerfLvlDP "IOG: 6th-9th Grade ELA Course Grades: Number of students who had at least two performance level data points"
+   RSO_ELACG69_RawInc "6th-9th Grade ELA Course Grades: Number of students who improved at least one letter grade"
    IOG_ELACG69_StartOffSlid "IOG: 6th-9th Grade ELA Course Grades: Number of students who started off-track or sliding"
    IOG_ELACG69_SOSMoveOn "IOG: 6th-9th Grade ELA Course Grades: Number of students who started off-track or sliding and moved back on-track"
    MTHAssess_anyRawDP "Number of students with at least one raw math assessment performance data point"
+   MTHAssess_2RawDP "Number of students with at least two math assessment raw score data points"
    MTHAssess_2PerfLvlDP "Number of students with at least two math assessment performance level data points"
+   MTHAssess_RawInc "Number of students who improved in math assessment raw scores"
    MTHAssess_StartOffSlid "Number of students who started off-track or sliding in math assessments"
    MTHAssess_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math assessments"
    IOG_MTHAssess35_anyRawDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   RSO_MTHAssess35_2RawDP "3rd-5th Grade Math Assessments: Number of students who had at least two raw score data points"
    IOG_MTHAssess35_2PerfLvlDP "IOG: 3rd-5th Grade Math Assessments: Number of students who had at least two performance level data points"
+   RSO_MTHAssess35_RawInc "3rd-5th Grade Math Assessments: Number of students who improved raw scores"
    IOG_MTHAssess35_StartOffSlid "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess35_SOSMoveOn "IOG: 3rd-5th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
    IOG_MTHAssess69_anyRawDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   RSO_MTHAssess69_2RawDP "6th-9th Grade Math Assessments: Number of students who had at least two raw score data points"
    IOG_MTHAssess69_2PerfLvlDP "IOG: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   RSO_MTHAssess69_RawInc "6th-9th Grade Math Assessments: Number of students who improved raw scores"
    IOG_MTHAssess69_StartOffSlid "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
    IOG_MTHAssess69_SOSMoveOn "IOG: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
+   DN_MTHAssess69_anyRawDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least one raw performance data point"
+   DN_MTHAssess69_2RawDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least two raw scores data points"
+   DN_MTHAssess69_2PerfLvlDP "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who had at least two performance level data points"
+   DN_MTHAssess69_RawInc "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who improved raw scores"
+   DN_MTHAssess69_StartOffSlid "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding"
+   DN_MTHAssess69_SOSMoveOn "Diplomas Now: 6th-9th Grade Math Assessments: Number of students who started off-track or sliding and moved back on-track"
    BOCY_MTHAssess35_StartOffSlid "Best of City Year: 3rd-5th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    BOCY_MTHAssess69_StartOffSlid "Best of City Year: 6th-9th Grade Math Assessments: Number of students on official focus lists, who met dosage target, and started off-track or sliding"
    MTHCG_anyRawDP "Number of students with at least one math course grade performance data point"
+   MTHCG_2RawDP "Number of students with at least two math course grade data points"
    MTHCG_2PerfLvlDP "Number of students with at least two math course grade performance level data points"
+   MTHCG_RawInc "Number of students who improved at least one letter grade in math"
    MTHCG_StartOffSlid "Number of students who started off-track or sliding in math course grades"
    MTHCG_SOSMoveOn "Number of students who started off-track or sliding and moved back on-track in math course grades"
    IOG_MTHCG69_anyRawDP "IOG: 6th-9th Grade Math Course Grades: Number of students who had at least one course grade performance data point"
+   RSO_MTHCG69_2RawDP "6th-9th Grade Math Course Grades: Number of students who had at least two course grade data points"
    IOG_MTHCG69_2PerfLvlDP "IOG: 6th-9th Grade Math Course Grades: Number of students who had at least two performance level data points"
+   RSO_MTHCG69_RawInc "6th-9th Grade Math Course Grades: Number of students who improved at least one letter grade"
    IOG_MTHCG69_StartOffSlid "IOG: 6th-9th Grade Math Course Grades: Number of students who started off-track or sliding"
    IOG_MTHCG69_SOSMoveOn "IOG: 6th-9th Grade Math Course Grades: Number of students who started off-track or sliding and moved back on-track"
    ATT_anyRawDP "Number of students with at least one attendance (ADA) performance data point"
+   ATT_2RawDP "Number of students with at least two attendance (ADA) performance data points"
    ATT_2PerfLvlDP "Number of students with at least two attendance (ADA) performance level data points"
+   ATT_StartLTE99ADA "Number of students who started with less than or equal to 99% average daily attendance"
    ATT_StartLT90ADA "Number of students who started with less than 90% average daily attendance"
    ATT_SOSMoveOn "Number of students who started below 90% ADA and moved to at or above 90% ADA"
    IOG_ATT69_anyRawDP "IOG: 6th-9th Grade Attendance: Number of students who had at least one ADA performance data point"
+   RSO_ATT69_2RawDP "6th-9th Grade Attendance: Number of students who had at least two performance data points"
    IOG_ATT69_2PerfLvlDP "IOG: 6th-9th Grade Attendance: Number of students who had at least two performance level data points"
+   RSO_ATT69_StartLTE99ADA "6th-9th Grade Attendance: Number of students who started with less than or equal to 99% average daily attendance"
+   RSO_ATT69_1PercInc "6th-9th Grade Attendance: Number of students who improved ADA by at least 1 percentage point"
    IOG_ATT69_StartLT90ADA "IOG: 6th-9th Grade Attendance: Number of students who started with less than 90% average daily attendance"
    IOG_ATT69_SOSMoveOn "IOG: 6th-9th Grade Attendance: Number of students who started below 90% ADA and moved to at or above 90% ADA"
    BOCY_ATT69_StartLT90ADA "Best of City Year: 6th-9th Grade Attendance: Number of students on official focus lists, enrolled 56+ days, and started with less than 90% average daily attendance"
+   BEHSCH_anyRawDP "Number of students with at least one suspension data point"
+   BEHSCH_2RawDP "Number of students with at least two suspension data points"
+   BEHSCH_StartGTE2SUS "Number of students who started with at least two suspensions"
+   BEHSCH_SOSMoveOn "Number of students who started with at least two suspensions and ended with less than 2 suspensions"
+   RSO_BEH39_anyRawDP "3rd-9th Grade Behavior: Number of students with at least one suspension data point"
+   RSO_BEH39_2RawDP "3rd-9th Grade Behavior: Number of students with at least two suspension data points"
+   RSO_BEH39_StartGTE2SUS "3rd-9th Grade Behavior: Number of students who started with at least two suspensions"
+   RSO_BEH39_SOSMoveOn "3rd-9th Grade Behavior: Number of students who started with at least two suspensions and ended with less than 2 suspensions"
    LITMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting ELA/Literacy Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    MTHMetQ4DosePerc "DOSAGE ACTUAL\n% of Students Meeting Math Q4 Dosage Benchmark (out of ACTUAL FL Enrollment)"
    ATTMet56DosePerc "DOSAGE ACTUAL\n% of Students Enrolled 56+ Days (Attendance, out of ACTUAL FL Enrollment)"
@@ -2315,7 +2665,18 @@ VARIABLE LABELS cyStudentIDCount "Total number of student records"
    IOG_MTHAssess35_SOSMoveOnPerc "IOG ACTUAL\n3rd-5th Grade Math: % of Students who Moved from Below Benchmark on Math Skills Assessments to At/Above Benchmark"
    IOG_MTHAssess69_SOSMoveOnPerc "IOG ACTUAL\n6th-9th Grade Math: % of Students who Moved from Below Benchmark on Math Skills Assessments to At/Above Benchmark"
    IOG_MTHCG69_SOSMoveOnPerc 'IOG ACTUAL\n6th-9th Grade Math: % of Students who Moved from a Math Course Grade of "D" or Lower to a "C" or Higher'
-   IOG_ATT69_SOSMoveOnPerc "IOG ACTUAL\n6th-9th Grade Attendance: % of Students who Moved from Below 90% ADA to At/Above 90% ADA".
+   IOG_ATT69_SOSMoveOnPerc "IOG ACTUAL\n6th-9th Grade Attendance: % of Students who Moved from Below 90% ADA to At/Above 90% ADA"
+   RSO_LITAssess35_RawIncPerc "3rd-5th Grade Literacy: % of Students who Improved Raw Scores on Literacy Skills Assessments"
+   RSO_LITAssess69_RawIncPerc "6th-9th Grade Literacy: % of Students who Improved Raw Scores on Literacy Skills Assessments"
+   RSO_ELACG69_RawIncPerc "6th-9th Grade ELA: % of Students who Improved at Least One Letter Grade"
+   RSO_MTHAssess35_RawIncPerc "3rd-5th Grade Math: % of Students who Improved Raw Scores on Math Skills Assessments"
+   RSO_MTHAssess69_RawIncPerc "6th-9th Grade Math: % of Students who Improved Raw Scores on Math Skills Assessments"
+   RSO_MTHCG69_RawIncPerc "6th-9th Grade Math: % of Students who Improved at Least One Letter Grade"
+   RSO_BEH39_SOSMoveOnPerc "3rd-9th Grade Behavior: % of Students No Longer at Risk (2 or more suspensions to 1 or fewer suspensions)"
+   DN_LITAssess69_SOSMoveOnPerc "Diploma's Now: % of Students who Moved Back On-Track in Literacy Skills Assessments"
+   DN_LITAssess69_RawIncPerc "Diploma's Now: % of Students who Improved Raw Scores on Literacy Skills Assessments"
+   DN_MTHAssess69_SOSMoveOnPerc "Diploma's Now: % of Students who Moved Back On-Track in Math Skills Assessments"
+   DN_MTHAssess69_RawIncPerc "Diploma's Now: % of Students who Improved Raw Scores on Math Skills Assessments".
 
 VALUE LABELS RegionID 1 "Atlantic"
 2 "Midwest"
